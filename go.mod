@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/orandin/lumberjackrus v1.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zeromicro/go-zero v1.7.6
 	golang.org/x/crypto v0.32.0
@@ -29,4 +29,5 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241015192408-796eee8c2d53 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
