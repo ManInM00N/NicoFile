@@ -3,19 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"main/server/proto"
-	. "main/util"
-
 	"google.golang.org/grpc"
+	"log"
+	"main/server/proto"
 )
 
-func main() {
-	InfoLog.Println("log init")
+func _() {
+
+	log.Println("log init")
 	conn, err := grpc.NewClient(":50051", grpc.WithInsecure())
 	if err != nil {
-		fmt.Println("err")
-		ErrorLog.Printf("did not connect: %v", err)
-		//panic(err)
+		log.Printf("did not connect: %v\n", err)
+		panic(err)
 		return
 
 	}
@@ -29,9 +28,13 @@ func main() {
 		Password: "password123",
 	})
 	if err != nil {
-		ErrorLog.Printf("could not login: %v", err)
+		log.Printf("could not login: %v", err)
 		panic(err)
 	}
 
 	fmt.Printf("Login Response: %v\n", res.Message)
+}
+
+func main() {
+
 }

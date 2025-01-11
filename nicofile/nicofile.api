@@ -1,0 +1,120 @@
+syntax = "v1"
+
+type (
+	LoginRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	RegisterRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	AuthResponse {
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+	NewNameRequest {
+		Indentity string `json:"indentity"`
+		NewName   string `json:"newName"`
+	}
+	NewNameResponse {
+		Message string `json:"message"`
+	}
+	Request {
+		Name string `path:"name,options=you|me"`
+	}
+	Response {
+		Message string `json:"message"`
+	}
+)
+
+service nicofile-api {
+	@handler NicofileHandler
+	get /from/:name (Request) returns (Response)
+}
+
+@server (
+	prefix:  /api/v1
+	group:   user
+	timeout: 3s
+)
+service nicofile-api {
+	@handler UserLoginHandler
+	post /user/login (LoginRequest) returns (AuthResponse)
+
+	@handler UserRegisterHandler
+	post /user/register (RegisterRequest) returns (AuthResponse)
+
+	@handler UserChangeNameHandler
+	post /user/newname (NewNameRequest) returns (NewNameResponse)
+}
+
+type (
+	FileMeta {
+		Id           int64  `json:"id"`
+		FileName     string `json:"filename"`
+		FilePath     string `json:"filepath"`
+		FileSize     int64  `json:"filesize"`
+		UploadedSize int64  `json:"uploadedsize"`
+		Status       string `json:"status"`
+		CreatedAt    string `json:"createdat"`
+	}
+	FileCutUploadRequest {
+		Hash string `json:"hash,optional"`
+		Name string `json:"name,optional"`
+		Ext  string `json:"ext,optional"`
+		Size int64  `json:"size,optional"`
+		Path string `json:"path,optional"`
+	}
+	FileCutUploadResponse {
+		Identity string `json:"identity"`
+		Ext      string `json:"ext"`
+		Name     string `json:"name"`
+	}
+	FileUploadRequest  {}
+	FileUploadResponse  {}
+	FileDownloadRequest  {}
+	FileDownloadResponse  {}
+	FileDeleteRequest {
+		Identity string `json:"identity"`
+	}
+	FileDeleteResponse  {}
+	FileListRequest {
+		Id   int64 `json:"id,optional"`
+		Page int   `json:"page,optional"`
+		Size int   `json:"size,optional"`
+	}
+	FileListResponse {
+		List  []*File `json:"list"`
+		Count int64   `json:"count"`
+	}
+	File {
+		Id                 int64  `json:"id"`
+		Identity           string `json:"identity"`
+		RepositoryIdentity string `json:"repository_identity"`
+		Name               string `json:"name"`
+		Ext                string `json:"ext"`
+		Path               string `json:"path"`
+		Size               int64  `json:"size"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	jwt:    Auth
+	group:  file
+)
+service nicofile-api {
+	@handler FileUploadHandler
+	post /file/upload (FileUploadRequest) returns (FileUploadResponse)
+
+	@handler FileDownloadHandler
+	get /file/download/:filename (FileDownloadRequest) returns (FileDownloadResponse)
+
+	@handler FileDeleteHandler
+	delete /file/delete/:filename (FileDeleteRequest) returns (FileDeleteResponse)
+
+	@handler FileListHandler
+	get /file/list (FileListRequest) returns (FileListResponse)
+}
+

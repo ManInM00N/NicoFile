@@ -1,8 +1,8 @@
 package config
 
 import (
+	"log"
 	"main/model"
-	. "main/util"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -10,15 +10,15 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() {
+func InitDB() *gorm.DB {
 	var err error
 	DB, err = gorm.Open(sqlite.Open("./data.db"), &gorm.Config{})
 	if err != nil {
-		ErrorLog.Println("failed to connect to database:", err)
-		panic(err)
+		log.Fatalln("failed to connect to database:", err)
 	}
 	err = DB.AutoMigrate(&model.User{}) // 自动迁移 User 模型
 	if err != nil {
-		ErrorLog.Println("Table User failed Migrate")
+		log.Fatalln("Table User failed Migrate")
 	}
+	return DB
 }
