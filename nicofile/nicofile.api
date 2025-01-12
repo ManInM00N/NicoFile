@@ -1,5 +1,10 @@
 syntax = "v1"
 
+type Auth {
+	AccessToken  string `json:"access_token"`
+	AccessExpire int64  `json:"access_expire"`
+}
+
 type (
 	LoginRequest {
 		Username string `json:"username"`
@@ -14,7 +19,7 @@ type (
 		Token   string `json:"token"`
 	}
 	NewNameRequest {
-		Indentity string `json:"indentity"`
+		Indentity string `json:"indentity,optional"`
 		NewName   string `json:"newName"`
 	}
 	NewNameResponse {
@@ -44,7 +49,16 @@ service nicofile-api {
 
 	@handler UserRegisterHandler
 	post /user/register (RegisterRequest) returns (AuthResponse)
+}
 
+@server (
+	prefix:     /api/v1
+	group:      user
+	timeout:    3s
+	middleware: UserExistMiddleware
+	jwt:        Auth
+)
+service nicofile-api {
 	@handler UserChangeNameHandler
 	post /user/newname (NewNameRequest) returns (NewNameResponse)
 }
@@ -58,18 +72,6 @@ type (
 		UploadedSize int64  `json:"uploadedsize"`
 		Status       string `json:"status"`
 		CreatedAt    string `json:"createdat"`
-	}
-	FileCutUploadRequest {
-		Hash string `json:"hash,optional"`
-		Name string `json:"name,optional"`
-		Ext  string `json:"ext,optional"`
-		Size int64  `json:"size,optional"`
-		Path string `json:"path,optional"`
-	}
-	FileCutUploadResponse {
-		Identity string `json:"identity"`
-		Ext      string `json:"ext"`
-		Name     string `json:"name"`
 	}
 	FileUploadRequest  {}
 	FileUploadResponse  {}
@@ -97,12 +99,34 @@ type (
 		Path               string `json:"path"`
 		Size               int64  `json:"size"`
 	}
+	UploadChunkRequest {
+		FileName   string `json:"filename"`
+		MD5        string `json:"md5"`
+		ChunkIndex int    `json:"chunkIndex"`
+		Chunk      []byte `json:"chunk"`
+	}
+	UploadChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Message string `json:"message,optional"`
+	}
+	MergeChunkRequest {
+		FileName string `json:"filename"`
+		MD5      string `json:"md5",optional`
+		Ext      string `json:"ext"`
+		ChunkNum int    `json:"chunkNum",range=[1,]`
+		Size     int64  `json:"size"`
+	}
+	MergeChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Message string `json:"message,optional"`
+	}
 )
 
 @server (
-	prefix: /api/v1
-	jwt:    Auth
-	group:  file
+	prefix:     /api/v1
+	jwt:        Auth
+	middleware: UserExistMiddleware
+	group:      file
 )
 service nicofile-api {
 	@handler FileUploadHandler
@@ -116,5 +140,11 @@ service nicofile-api {
 
 	@handler FileListHandler
 	get /file/list (FileListRequest) returns (FileListResponse)
+
+	@handler UploadChunkHandler
+	post /file/uploadchunk (UploadChunkRequest) returns (UploadChunkResponse)
+
+	@handler MergeChunkHandler
+	post /file/mergechunk (MergeChunkRequest) returns (MergeChunkResponse)
 }
 

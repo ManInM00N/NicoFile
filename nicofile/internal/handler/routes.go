@@ -26,28 +26,41 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodDelete,
-				Path:    "/file/delete/:filename",
-				Handler: file.FileDeleteHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/file/download/:filename",
-				Handler: file.FileDownloadHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/file/list",
-				Handler: file.FileListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/file/upload",
-				Handler: file.FileUploadHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.UserExistMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodDelete,
+					Path:    "/file/delete/:filename",
+					Handler: file.FileDeleteHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/file/download/:filename",
+					Handler: file.FileDownloadHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/file/list",
+					Handler: file.FileListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/file/mergechunk",
+					Handler: file.MergeChunkHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/file/upload",
+					Handler: file.FileUploadHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/file/uploadchunk",
+					Handler: file.UploadChunkHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)
@@ -61,15 +74,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
-				Path:    "/user/newname",
-				Handler: user.UserChangeNameHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
 				Path:    "/user/register",
 				Handler: user.UserRegisterHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/api/v1"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.UserExistMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/user/newname",
+					Handler: user.UserChangeNameHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)

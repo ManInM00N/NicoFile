@@ -3,6 +3,11 @@
 
 package types
 
+type Auth struct {
+	AccessToken  string `json:"access_token"`
+	AccessExpire int64  `json:"access_expire"`
+}
+
 type AuthResponse struct {
 	Message string `json:"message"`
 	Token   string `json:"token"`
@@ -16,20 +21,6 @@ type File struct {
 	Ext                string `json:"ext"`
 	Path               string `json:"path"`
 	Size               int64  `json:"size"`
-}
-
-type FileCutUploadRequest struct {
-	Hash string `json:"hash,optional"`
-	Name string `json:"name,optional"`
-	Ext  string `json:"ext,optional"`
-	Size int64  `json:"size,optional"`
-	Path string `json:"path,optional"`
-}
-
-type FileCutUploadResponse struct {
-	Identity string `json:"identity"`
-	Ext      string `json:"ext"`
-	Name     string `json:"name"`
 }
 
 type FileDeleteRequest struct {
@@ -77,8 +68,21 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type MergeChunkRequest struct {
+	FileName string `json:"filename"`
+	MD5      string `json:"md5",optional`
+	Ext      string `json:"ext"`
+	ChunkNum int    `json:"chunkNum",range=[1,]`
+	Size     int64  `json:"size"`
+}
+
+type MergeChunkResponse struct {
+	Error   bool   `json:"error,options=true|false"`
+	Message string `json:"message,optional"`
+}
+
 type NewNameRequest struct {
-	Indentity string `json:"indentity"`
+	Indentity string `json:"indentity,optional"`
 	NewName   string `json:"newName"`
 }
 
@@ -97,4 +101,16 @@ type Request struct {
 
 type Response struct {
 	Message string `json:"message"`
+}
+
+type UploadChunkRequest struct {
+	FileName   string `json:"filename"`
+	MD5        string `json:"md5"`
+	ChunkIndex int    `json:"chunkIndex"`
+	Chunk      []byte `json:"chunk"`
+}
+
+type UploadChunkResponse struct {
+	Error   bool   `json:"error,options=true|false"`
+	Message string `json:"message,optional"`
 }

@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"main/model"
+	"main/pkg/encrypt"
+	"main/pkg/jwt"
 
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
@@ -25,6 +28,14 @@ func NewUserRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 
 func (l *UserRegisterLogic) UserRegister(req *types.RegisterRequest) (resp *types.AuthResponse, err error) {
 	// todo: add your logic here and delete this line
-
+	var User model.User
+	User.Username = req.Username
+	User.Password = encrypt.EncPassword(req.Password)
+	l.svcCtx.DB.Create(&User)
+	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
+	resp = &types.AuthResponse{
+		Message: "注册成功",
+		Token:   token.AccessToken,
+	}
 	return
 }

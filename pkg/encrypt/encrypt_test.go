@@ -1,6 +1,8 @@
 package encrypt
 
 import (
+	"bufio"
+	"os"
 	"slices"
 	"testing"
 )
@@ -27,5 +29,18 @@ func TestEncryptMobile(t *testing.T) {
 	}
 	if mobile != decryptedMobile {
 		t.Fatalf("expected %s, but got %s", mobile, decryptedMobile)
+	}
+}
+func TestFileMd5(t *testing.T) {
+	data := []byte("5.5@#$")
+	file, _ := os.OpenFile("a.txt", os.O_CREATE|os.O_RDWR, os.ModePerm)
+	reader := bufio.NewReader(file)
+	buf := make([]byte, 1024)
+	num, err := reader.Read(buf)
+	if err != nil {
+		return
+	}
+	if Md5Sum(buf[:num]) != Md5Sum(data) {
+		t.Fatal("md5 error", data, buf[:num])
 	}
 }

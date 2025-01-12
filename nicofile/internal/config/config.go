@@ -4,7 +4,8 @@ import "github.com/zeromicro/go-zero/rest"
 
 type Config struct {
 	rest.RestConf
-	Auth struct {
+	ChunkStorePath string
+	Auth           struct {
 		AccessSecret string
 		AccessExpire int64
 	}
