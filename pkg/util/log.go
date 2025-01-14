@@ -33,7 +33,7 @@ func (lg *logger) Println(data ...any) {
 		return
 	}
 	lg.checkdate()
-	lg.out.Println(data)
+	lg.out.Println(data...)
 }
 
 func (lg *logger) Printf(str string, data ...any) {
@@ -43,7 +43,7 @@ func (lg *logger) Printf(str string, data ...any) {
 		return
 	}
 	lg.checkdate()
-	lg.out.Printf(str, data)
+	lg.out.Printf(str, data...)
 }
 
 func NewLogger(out io.Writer, prefix string, flag int, fileprefix string) *logger {
@@ -78,12 +78,12 @@ func init() {
 }
 
 func (lg *logger) checkdate() {
-	T := time.Now()
-	tmp := fmt.Sprintf("log/%s%04d-%02d-%02d.log", lg.fileprefix, T.Year(), T.Month(), T.Day())
-	if tmp != lg.filename {
-		lg.filename = tmp
-		lg.logfile.Close()
-		lg.logfile, _ = os.OpenFile(lg.filename, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
-		lg.out.SetOutput(lg.logfile)
-	}
+	//T := time.Now()
+	//tmp := fmt.Sprintf("log/%s%04d-%02d-%02d.log", lg.fileprefix, T.Year(), T.Month(), T.Day())
+	//if tmp != lg.filename {
+	//	lg.filename = tmp
+	//	lg.logfile.Close()
+	//	lg.logfile, _ = os.OpenFile(lg.filename, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
+	//	lg.out.SetOutput(lg.logfile)
+	//}
 }

@@ -3,10 +3,13 @@ package file
 import (
 	"bufio"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"io"
 	"main/model"
-	"main/pkg/encrypt"
+	"main/pkg/util"
+	"mime/multipart"
 	"os"
 
 	"main/nicofile/internal/svc"
@@ -29,34 +32,43 @@ func NewUploadChunkLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Uploa
 	}
 }
 
-func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest) (resp *types.UploadChunkResponse, err error) {
+func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *multipart.File, Handler *multipart.FileHeader) (resp *types.UploadChunkResponse, err error) {
 	// todo: add your logic here and delete this line
-
 	num := int64(0)
-	resp.Error = false
-	l.svcCtx.DB.Where("md5 = ?", req.MD5).Count(&num)
-	if num == 1 {
+	resp = &types.UploadChunkResponse{
+		Error: false,
+	}
+	l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ?", req.MD5, fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex)).Count(&num)
+	if num >= 1 {
 		resp.Message = "文件已存在"
 		return
 	}
-	f, _ := os.OpenFile(fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, req.ChunkIndex), os.O_CREATE|os.O_WRONLY, 0666)
-	writer := bufio.NewWriter(f)
-	_, err = writer.Write(req.Chunk)
-
+	f, err := os.OpenFile(fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, req.ChunkIndex), os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		logrus.Errorln(err)
 		resp.Error = true
-		resp.Message = "写入分片文件失败"
+		resp.Message = "创建分片文件失败"
 		return resp, nil
 	}
-	if err = writer.Flush(); err != nil {
-		return nil, err
+	writer := bufio.NewWriter(f)
+	arr := util.Pool.Get().([]byte)
+	defer util.Pool.Put(arr)
+	hash := md5.New()
+	for {
+		len, err := (*File).Read(arr)
+		if err == io.EOF || len == 0 {
+			break
+		}
+		writer.Write(arr[:len])
+		hash.Write(arr[:len])
+		writer.Flush()
 	}
+	(*File).Close()
+	f.Close()
 	file := model.File{
-		MD5:      encrypt.Md5Sum(req.Chunk),
-		FileName: req.FileName,
+		MD5:      hex.EncodeToString(hash.Sum(nil)),
+		FileName: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
 		IsChunk:  true,
-		Size:     int64(len(req.Chunk)),
+		Size:     Handler.Size,
 	}
 	l.svcCtx.DB.Create(&file)
 	resp.Message = "上传成功"

@@ -104,10 +104,9 @@ type Response struct {
 }
 
 type UploadChunkRequest struct {
-	FileName   string `json:"filename"`
-	MD5        string `json:"md5"`
-	ChunkIndex int    `json:"chunkIndex"`
-	Chunk      []byte `json:"chunk"`
+	FileName   string `form:"filename"`
+	MD5        string `form:"md5"`
+	ChunkIndex int    `form:"chunkIndex"`
 }
 
 type UploadChunkResponse struct {

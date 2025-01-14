@@ -1,7 +1,10 @@
 Name: nicofile-api
 Host: 0.0.0.0
 Port: 8888
+MaxBytes: 5345280
+MaxConns: 100
 Auth:
   AccessSecret: "114514_1919810"
   AccessExpire: 603600
-ChunkStorePath: "./chunkstore"
+ChunkStorePath: "chunkstore"
+StoragePath: "storage"
