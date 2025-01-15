@@ -110,13 +110,25 @@ type (
 	}
 	MergeChunkRequest {
 		FileName string `json:"filename"`
-		MD5      string `json:"md5",optional`
+		MD5      string `json:"md5,optional"`
 		Ext      string `json:"ext"`
-		ChunkNum int    `json:"chunkNum",range=[1,]`
+		ChunkNum int    `json:"chunkNum,range=[1,]"`
 		Size     int64  `json:"size"`
 	}
 	MergeChunkResponse {
 		Error   bool   `json:"error,options=true|false"`
+		Message string `json:"message,optional"`
+	}
+	CheckChunkRequest {
+		FileName string   `json:"filename"`
+		MD5      []string `json:"md5"`
+		ChunkNum int      `json:"chunkNum"`
+		FileMd5  string   `json:"fileMd5"`
+		Ext      string   `json:"ext"`
+	}
+	CheckChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Accept  int    `json:"accept,range=[0,]"`
 		Message string `json:"message,optional"`
 	}
 )
@@ -145,5 +157,8 @@ service nicofile-api {
 
 	@handler MergeChunkHandler
 	post /file/mergechunk (MergeChunkRequest) returns (MergeChunkResponse)
+
+	@handler CheckChunkHandler
+	post /file/checkchunk (CheckChunkRequest) returns (CheckChunkResponse)
 }
 

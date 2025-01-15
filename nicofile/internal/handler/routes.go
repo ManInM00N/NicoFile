@@ -30,6 +30,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.UserExistMiddleware},
 			[]rest.Route{
 				{
+					Method:  http.MethodPost,
+					Path:    "/file/checkchunk",
+					Handler: file.CheckChunkHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodDelete,
 					Path:    "/file/delete/:filename",
 					Handler: file.FileDeleteHandler(serverCtx),

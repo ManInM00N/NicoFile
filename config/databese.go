@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+var (
+	DB       *gorm.DB
+	PageSize = 10
+)
 
 func InitDB() *gorm.DB {
 	var err error

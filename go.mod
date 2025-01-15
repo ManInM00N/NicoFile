@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/juju/ratelimit v1.0.2
 	github.com/orandin/lumberjackrus v1.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/zeromicro/go-zero v1.7.6

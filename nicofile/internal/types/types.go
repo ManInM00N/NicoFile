@@ -13,6 +13,20 @@ type AuthResponse struct {
 	Token   string `json:"token"`
 }
 
+type CheckChunkRequest struct {
+	FileName string   `json:"filename"`
+	MD5      []string `json:"md5"`
+	ChunkNum int      `json:"chunkNum"`
+	FileMd5  string   `json:"fileMd5"`
+	Ext      string   `json:"ext"`
+}
+
+type CheckChunkResponse struct {
+	Error   bool   `json:"error,options=true|false"`
+	Accept  int    `json:"accept,range=[0,]"`
+	Message string `json:"message,optional"`
+}
+
 type File struct {
 	Id                 int64  `json:"id"`
 	Identity           string `json:"identity"`
