@@ -14,7 +14,7 @@ const fileMd5 = ref('')
 const maxSize  = ref(5 * 1024 * 1024 * 1024), // 上传最大文件限制  最小单位是b
     chunkSize = 1024 * 1024 * 5, // 每块文件大小   100mb
     fileList = ref([])
-
+const FindList = ref([])
 async function Remove(file, filelist) {
   console.log(file.name,file.status)
   fileList.value = filelist
@@ -73,12 +73,14 @@ const uploadFileToServer = async (file, chunkNumber, fileName,_md5) => {
 }
 
 const mergeFiles = async (chunkTotal, fileName,ext,size) => {
+  console.log(chunkTotal)
   const result =await axios.post("http://localhost:8888/api/v1/file/mergechunk", {
     chunkNum: chunkTotal,
     filename: fileName,
     md5 :fileMd5.value,
     ext: ext,
-    size: size
+    size: size,
+    description :''
   },{
     headers: {
       "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzMxNDk5OSwiaWF0IjoxNzM2NzExMzk5fQ.6ASy3-He6IxqhXmATyKekvGWtOw5I9PPb1_9-rgJNDs",
@@ -171,6 +173,27 @@ const submit = async () => {
     >
         {{progressNow}}
     </el-progress>
+    <div style="display: flex;">
+      <div v-for="(item,index) in FindList" :key="item.id">
+        <el-card class="box-card" style="width: 300px">
+          <div slot="header" class="clearfix">
+            <span>{{item.filename}}</span>
+          </div>
+          <div>
+            <span>文件大小:{{item.size}}</span>
+          </div>
+          <div>
+            <span>文件类型:{{item.ext}}</span>
+          </div>
+          <div>
+            <span>文件描述:{{item.description}}</span>
+          </div>
+          <div>
+            <span>上传时间:{{item.createTime}}</span>
+          </div>
+        </el-card>
+      </div>
+    </div>
   </div>
 </template>
 

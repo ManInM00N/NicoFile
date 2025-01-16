@@ -72,6 +72,7 @@ func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *mult
 		FileName: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
 		IsChunk:  true,
 		Size:     Handler.Size,
+		FilePath: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
 	}
 	l.svcCtx.DB.Create(&file)
 	resp.Message = "上传成功"

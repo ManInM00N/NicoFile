@@ -23,18 +23,19 @@ type CheckChunkRequest struct {
 
 type CheckChunkResponse struct {
 	Error   bool   `json:"error,options=true|false"`
-	Accept  int    `json:"accept,range=[0,]"`
+	Accept  int    `json:"accept,range=[0:]"`
 	Message string `json:"message,optional"`
 }
 
 type File struct {
-	Id                 int64  `json:"id"`
-	Identity           string `json:"identity"`
-	RepositoryIdentity string `json:"repository_identity"`
-	Name               string `json:"name"`
-	Ext                string `json:"ext"`
-	Path               string `json:"path"`
-	Size               int64  `json:"size"`
+	Id         int64  `json:"id"`
+	PosterId   string `json:"posterId"`
+	PosterName string `json:"posterName"`
+	MD5        string `json:"md5"`
+	Name       string `json:"name"`
+	Ext        string `json:"ext"`
+	Path       string `json:"path"`
+	Size       int64  `json:"size"`
 }
 
 type FileDeleteRequest struct {
@@ -42,6 +43,8 @@ type FileDeleteRequest struct {
 }
 
 type FileDeleteResponse struct {
+	Message string `json:"message"`
+	Error   bool   `json:"error"`
 }
 
 type FileDownloadRequest struct {
@@ -52,13 +55,15 @@ type FileDownloadResponse struct {
 
 type FileListRequest struct {
 	Id   int64 `json:"id,optional"`
-	Page int   `json:"page,optional"`
-	Size int   `json:"size,optional"`
+	Page int   `json:"page,range=[1,]"`
+	Size int64 `json:"size,optional"`
 }
 
 type FileListResponse struct {
-	List  []*File `json:"list"`
-	Count int64   `json:"count"`
+	List    []File `json:"list"`
+	Num     int    `json:"num"`
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
 }
 
 type FileMeta struct {
@@ -83,11 +88,12 @@ type LoginRequest struct {
 }
 
 type MergeChunkRequest struct {
-	FileName string `json:"filename"`
-	MD5      string `json:"md5",optional`
-	Ext      string `json:"ext"`
-	ChunkNum int    `json:"chunkNum",range=[1,]`
-	Size     int64  `json:"size"`
+	FileName    string `json:"filename"`
+	MD5         string `json:"md5,optional"`
+	Ext         string `json:"ext"`
+	ChunkNum    int    `json:"chunkNum,range=[1:]"`
+	Size        int64  `json:"size"`
+	Description string `json:"description,optional"`
 }
 
 type MergeChunkResponse struct {

@@ -3,14 +3,14 @@ package file
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"main/model"
-	"os"
-	"path/filepath"
-
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
+	"os"
+	"path/filepath"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,9 +30,8 @@ func NewMergeChunkLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MergeC
 }
 
 func (l *MergeChunkLogic) MergeChunk(req *types.MergeChunkRequest) (resp *types.MergeChunkResponse, err error) {
-	// todo: add your logic here and delete this line
 	resp = &types.MergeChunkResponse{Error: false}
-	path := filepath.Join(l.svcCtx.Config.StoragePath, req.FileName+req.Ext)
+	path := filepath.Join(l.svcCtx.Config.StoragePath, req.FileName+"_"+l.ctx.Value("UserId").(json.Number).String()+req.MD5+req.Ext)
 	file, _ := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0666)
 	defer file.Close()
 	writer := bufio.NewWriter(file)
@@ -54,11 +53,13 @@ func (l *MergeChunkLogic) MergeChunk(req *types.MergeChunkRequest) (resp *types.
 		os.Remove(fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, i))
 	}
 	l.svcCtx.DB.Create(&model.File{
-		MD5:      req.MD5,
-		FileName: req.FileName + req.Ext,
-		IsChunk:  false,
-		Size:     req.Size,
-		Ext:      req.Ext,
+		MD5:         req.MD5,
+		FileName:    req.FileName + req.Ext,
+		IsChunk:     false,
+		Size:        req.Size,
+		Ext:         req.Ext,
+		FilePath:    path,
+		Description: req.Description,
 	})
 	resp.Message = "合并分片文件成功"
 	return

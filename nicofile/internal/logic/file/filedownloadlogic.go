@@ -24,7 +24,6 @@ func NewFileDownloadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *File
 }
 
 func (l *FileDownloadLogic) FileDownload(req *types.FileDownloadRequest) (resp *types.FileDownloadResponse, err error) {
-	// todo: add your logic here and delete this line
-
+	resp = &types.FileDownloadResponse{}
 	return
 }
