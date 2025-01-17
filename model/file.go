@@ -11,4 +11,6 @@ type File struct {
 	Size        int64  `gorm:"type:bigint;"`
 	Ext         string `gorm:"type:string;"`
 	Description string `gorm:"type:string;"`
+	AuthorID    uint
+	Author      User `gorm:"foreignKey:AuthorID;References:ID"`
 }

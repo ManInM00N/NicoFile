@@ -41,11 +41,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/file/download/:filename",
+					Path:    "/file/download",
 					Handler: file.FileDownloadHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodGet,
+					Method:  http.MethodPost,
 					Path:    "/file/list",
 					Handler: file.FileListHandler(serverCtx),
 				},

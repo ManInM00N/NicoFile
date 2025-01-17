@@ -75,6 +75,9 @@ func init() {
 	InfoLog.filename = logfile
 	ErrorLog.filename = errorfile
 	DebugLog.filename = debugfile
+	ErrorLog.Println("Error Start logging", T.String())
+	InfoLog.Println("Error Start logging", T.String())
+	DebugLog.Println("Error Start logging", T.String())
 }
 
 func (lg *logger) checkdate() {

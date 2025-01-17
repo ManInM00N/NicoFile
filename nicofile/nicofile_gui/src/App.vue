@@ -15,6 +15,38 @@ const maxSize  = ref(5 * 1024 * 1024 * 1024), // 上传最大文件限制  最�
     chunkSize = 1024 * 1024 * 5, // 每块文件大小   100mb
     fileList = ref([])
 const FindList = ref([])
+const auth = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzcwNjc4MiwiaWF0IjoxNzM3MTAzMTgyfQ.7zSrkyDflHVFMi22wLB-hYGBFLW97SwUk1mAvnpitv8"
+async function download(path,fileName){
+  // console.log("download")
+  const res = await axios.get("http://localhost:8888/api/v1/download?url="+path, {
+        headers: {
+          "Authorization":auth,
+        },
+        responseType: 'arraybuffer', // 响应类型设置为流
+  }).then((res) => {
+    const link = document.createElement('a');
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    link.href = url;
+    link.setAttribute('download', fileName); //   设置下载文件的名称
+
+    document.body.appendChild(link)
+    link.click();
+    document.body.removeChild(link)
+  })
+  console.log("download")
+
+}
+async function GetFileList() {
+  const res = await axios.post("http://localhost:8888/api/v1/file/list", {
+    page:1,
+  },{
+    headers: {
+      "Authorization": auth,
+    },
+  })
+  FindList.value = res.data.list
+  console.log(FindList.value)
+}
 async function Remove(file, filelist) {
   console.log(file.name,file.status)
   fileList.value = filelist
@@ -56,7 +88,7 @@ const uploadFileToServer = async (file, chunkNumber, fileName,_md5) => {
   console.log(_md5,chunkNumber)
   const result = await axios.post("http://localhost:8888/api/v1/file/uploadchunk", form,{
     headers: {
-      "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzMxNDk5OSwiaWF0IjoxNzM2NzExMzk5fQ.6ASy3-He6IxqhXmATyKekvGWtOw5I9PPb1_9-rgJNDs",
+      "Authorization": auth,
     },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.lengthComputable) {
@@ -83,7 +115,7 @@ const mergeFiles = async (chunkTotal, fileName,ext,size) => {
     description :''
   },{
     headers: {
-      "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzMxNDk5OSwiaWF0IjoxNzM2NzExMzk5fQ.6ASy3-He6IxqhXmATyKekvGWtOw5I9PPb1_9-rgJNDs",
+      "Authorization": auth,
     }
   })
   return result
@@ -98,7 +130,7 @@ async function checkchunk(chunkTotal, fileName,md5arr) {
     ext : Ext.value
   },{
     headers: {
-      "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzMxNDk5OSwiaWF0IjoxNzM2NzExMzk5fQ.6ASy3-He6IxqhXmATyKekvGWtOw5I9PPb1_9-rgJNDs",
+      "Authorization": auth,
     }
   })
   return resp.data
@@ -163,6 +195,7 @@ const submit = async () => {
     </el-upload>
     <el-button size="small" type="primary" @click="submit">点击上传</el-button>
     <el-button size="small" type="primary" @click="merge">点击合并</el-button>
+    <el-button size="small" type="primary" @click="GetFileList">文件列表</el-button>
     <el-progress
         :text-inside="true"
         :percentage="progress"
@@ -177,7 +210,7 @@ const submit = async () => {
       <div v-for="(item,index) in FindList" :key="item.id">
         <el-card class="box-card" style="width: 300px">
           <div slot="header" class="clearfix">
-            <span>{{item.filename}}</span>
+            <span @click="()=>{download(item.path,item.name)}">{{item.name}}</span>
           </div>
           <div>
             <span>文件大小:{{item.size}}</span>
@@ -186,10 +219,10 @@ const submit = async () => {
             <span>文件类型:{{item.ext}}</span>
           </div>
           <div>
-            <span>文件描述:{{item.description}}</span>
+            <span>文件描述:{{item.desc}}</span>
           </div>
           <div>
-            <span>上传时间:{{item.createTime}}</span>
+            <span>上传时间:{{item.createdAt}} 上传者:{{item.posterName}}</span>
           </div>
         </el-card>
       </div>

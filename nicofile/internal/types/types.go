@@ -28,14 +28,16 @@ type CheckChunkResponse struct {
 }
 
 type File struct {
-	Id         int64  `json:"id"`
-	PosterId   string `json:"posterId"`
+	Id         uint   `json:"id"`
+	PosterId   uint   `json:"posterId"`
 	PosterName string `json:"posterName"`
 	MD5        string `json:"md5"`
 	Name       string `json:"name"`
 	Ext        string `json:"ext"`
 	Path       string `json:"path"`
 	Size       int64  `json:"size"`
+	Desc       string `json:"desc"`
+	CreatedAt  string `json:"createdAt"`
 }
 
 type FileDeleteRequest struct {
@@ -48,6 +50,7 @@ type FileDeleteResponse struct {
 }
 
 type FileDownloadRequest struct {
+	Url string `form:"url"`
 }
 
 type FileDownloadResponse struct {
@@ -55,7 +58,7 @@ type FileDownloadResponse struct {
 
 type FileListRequest struct {
 	Id   int64 `json:"id,optional"`
-	Page int   `json:"page,range=[1,]"`
+	Page int   `json:"page,range=[1:]"`
 	Size int64 `json:"size,optional"`
 }
 

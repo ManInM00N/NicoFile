@@ -75,7 +75,9 @@ type (
 	}
 	FileUploadRequest  {}
 	FileUploadResponse  {}
-	FileDownloadRequest  {}
+	FileDownloadRequest {
+		Url string `form:"url"`
+	}
 	FileDownloadResponse  {}
 	FileDeleteRequest {
 		Identity string `json:"identity"`
@@ -86,7 +88,7 @@ type (
 	}
 	FileListRequest {
 		Id   int64 `json:"id,optional"`
-		Page int   `json:"page,range=[1,]"`
+		Page int   `json:"page,range=[1:]"`
 		Size int64 `json:"size,optional"`
 	}
 	FileListResponse {
@@ -96,14 +98,16 @@ type (
 		Message string `json:"message"`
 	}
 	File {
-		Id         int64  `json:"id"`
-		PosterId   string `json:"posterId"`
+		Id         uint   `json:"id"`
+		PosterId   uint   `json:"posterId"`
 		PosterName string `json:"posterName"`
 		MD5        string `json:"md5"`
 		Name       string `json:"name"`
 		Ext        string `json:"ext"`
 		Path       string `json:"path"`
 		Size       int64  `json:"size"`
+		Desc       string `json:"desc"`
+		CreatedAt  string `json:"createdAt"`
 	}
 	UploadChunkRequest {
 		FileName   string `form:"filename"`
@@ -151,13 +155,13 @@ service nicofile-api {
 	post /file/upload (FileUploadRequest) returns (FileUploadResponse)
 
 	@handler FileDownloadHandler
-	get /file/download/:filename (FileDownloadRequest) returns (FileDownloadResponse)
+	get /file/download (FileDownloadRequest) returns (FileDownloadResponse)
 
 	@handler FileDeleteHandler
 	delete /file/delete/:filename (FileDeleteRequest) returns (FileDeleteResponse)
 
 	@handler FileListHandler
-	get /file/list (FileListRequest) returns (FileListResponse)
+	post /file/list (FileListRequest) returns (FileListResponse)
 
 	@handler UploadChunkHandler
 	post /file/uploadchunk (UploadChunkRequest) returns (UploadChunkResponse)
