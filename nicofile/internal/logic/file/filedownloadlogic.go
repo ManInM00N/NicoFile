@@ -25,8 +25,8 @@ func NewFileDownloadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *File
 
 func (l *FileDownloadLogic) FileDownload(req *types.FileDownloadRequest, w http.ResponseWriter, file model.File) (resp *types.FileDownloadResponse, err error) {
 
-	resp = &types.FileDownloadResponse{}
-	//f, err := os.OpenFile(file.FilePath, os.O_RDONLY, 0666)
+	//resp = &types.FileDownloadResponse{}
+	//f, err := os.OpenFile(l.svcCtx.Config.StoragePath+"/"+file.FilePath, os.O_RDONLY, 0666)
 	////stat, _ := f.Stat()
 	////w.Header().Set("Content-Length", strconv.FormatInt(stat.Size(), 10))
 	//if err != nil {
@@ -46,6 +46,7 @@ func (l *FileDownloadLogic) FileDownload(req *types.FileDownloadRequest, w http.
 	//		return nil, err
 	//	}
 	//	w.Write(buffer)
+	//
 	//}
 	return
 }

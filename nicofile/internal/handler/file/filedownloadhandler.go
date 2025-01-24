@@ -24,19 +24,25 @@ func FileDownloadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/octet-stream")
+		//w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		w.Header().Set("Surrogate-Control", "no-store")
 		w.Header().Set("Content-Disposition", "attachment; filename="+File.FileName)
+		w.Header().Set("Content-Transfer-Encoding", "binary")
+
 		//w.Header().Set("Content-Length", strconv.FormatInt(File.Size, 10))
 		l := file.NewFileDownloadLogic(r.Context(), svcCtx)
 
-		resp, err := l.FileDownload(&req, w, File)
-		//f, err := os.OpenFile(File.FilePath, os.O_RDONLY, 0666)
+		_, err := l.FileDownload(&req, w, File)
+		//f, err := os.OpenFile(svcCtx.Config.StoragePath+"/"+File.FilePath, os.O_RDONLY, 0666)
 		//defer f.Close()
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
 			http.ServeFile(w, r, svcCtx.Config.StoragePath+"/"+File.FilePath)
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			//httpx.OkJsonCtx(r.Context(), w, resp)
 		}
 
 	}

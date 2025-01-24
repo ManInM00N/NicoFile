@@ -59,6 +59,11 @@ type NotFoundHandler struct {
 }
 
 func (n NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+	w.Header().Set("Surrogate-Control", "no-store")
 	filePath := strings.TrimPrefix(path.Clean(r.URL.Path), basename)
 	if len(filePath) == 0 {
 		filePath = basename

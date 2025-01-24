@@ -4,6 +4,8 @@ import axios from 'axios'
 import {ref} from "vue";
 import {getFileMd5, sleep} from "@/assets/js/encyrpt.js";
 
+const server = "http://152.32.133.174:7235/"
+const local = "http://127.0.0.1:8888/"
 const progress = ref(0),progressNow = ref('')
 const filename = ref('')
 const hasupload = ref(0)
@@ -15,29 +17,53 @@ const maxSize  = ref(5 * 1024 * 1024 * 1024), // 上传最大文件限制  最�
     chunkSize = 1024 * 1024 * 5, // 每块文件大小   100mb
     fileList = ref([])
 const FindList = ref([])
-const auth = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczNzcwNjc4MiwiaWF0IjoxNzM3MTAzMTgyfQ.7zSrkyDflHVFMi22wLB-hYGBFLW97SwUk1mAvnpitv8"
+const auth = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsImV4cCI6MTczODMxNzc0MCwiaWF0IjoxNzM3NzE0MTQwfQ.9ljDDpskCbv2A-3VpK6lwVg_VqKENKwZjaKk7NmA1Gg"
 async function download(path,fileName){
   // console.log("download")
-  const res = await axios.get("http://localhost:8888/api/v1/download?url="+path, {
-        headers: {
-          "Authorization":auth,
-        },
-        responseType: 'arraybuffer', // 响应类型设置为流
-  }).then((res) => {
-    const link = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    link.href = url;
-    link.setAttribute('download', fileName); //   设置下载文件的名称
+  const pathParts = path.split('/');
+  const filteredParts = pathParts.filter(part => part !== '');
 
-    document.body.appendChild(link)
-    link.click();
-    document.body.removeChild(link)
+  // const link = document.createElement('a');
+  console.log("filteredParts",filteredParts[0])
+  const url = local+"api/v1/file/download?url="+filteredParts[0]
+  await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': auth // 替换为实际的 Token
+    }
   })
-  console.log("download")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Unauthorized or file not found');
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const link = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        link.href = objectUrl;
+        link.setAttribute('download', fileName); // 强制指定文件名
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl); // 释放 URL 对象
+      })
+      .catch(error => console.error('There was a problem with the download:', error));
+
+
+
+  // link.href = url;
+  // link.setAttribute('download', fileName); //   设置下载文件的名称
+  // link.download = '';
+  // document.body.appendChild(link)
+  // link.click();
+  // document.body.removeChild(link)
+
+  // console.log("download")
 
 }
 async function GetFileList() {
-  const res = await axios.post("http://localhost:8888/api/v1/file/list", {
+  const res = await axios.post(local + "api/v1/file/list", {
     page:1,
   },{
     headers: {
@@ -86,7 +112,7 @@ const uploadFileToServer = async (file, chunkNumber, fileName,_md5) => {
   form.append("md5", _md5);
   form.append("filename", fileName);
   console.log(_md5,chunkNumber)
-  const result = await axios.post("http://localhost:8888/api/v1/file/uploadchunk", form,{
+  const result = await axios.post(local+"api/v1/file/uploadchunk", form,{
     headers: {
       "Authorization": auth,
     },
@@ -106,7 +132,7 @@ const uploadFileToServer = async (file, chunkNumber, fileName,_md5) => {
 
 const mergeFiles = async (chunkTotal, fileName,ext,size) => {
   console.log(chunkTotal)
-  const result =await axios.post("http://localhost:8888/api/v1/file/mergechunk", {
+  const result =await axios.post(local+"api/v1/file/mergechunk", {
     chunkNum: chunkTotal,
     filename: fileName,
     md5 :fileMd5.value,
@@ -122,7 +148,7 @@ const mergeFiles = async (chunkTotal, fileName,ext,size) => {
 }
 
 async function checkchunk(chunkTotal, fileName,md5arr) {
-  const resp = await axios.post("http://localhost:8888/api/v1/file/checkchunk", {
+  const resp = await axios.post(local+"api/v1/file/checkchunk", {
     chunkNum: chunkTotal,
     filename: fileName,
     md5 : md5arr,

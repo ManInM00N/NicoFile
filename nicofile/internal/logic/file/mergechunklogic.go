@@ -31,8 +31,8 @@ func NewMergeChunkLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MergeC
 
 func (l *MergeChunkLogic) MergeChunk(req *types.MergeChunkRequest) (resp *types.MergeChunkResponse, err error) {
 	resp = &types.MergeChunkResponse{Error: false}
-	path := filepath.Join(l.svcCtx.Config.StoragePath, req.FileName+"_"+l.ctx.Value("UserId").(json.Number).String()+req.MD5+req.Ext)
-	file, _ := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0666)
+	path := filepath.Join(req.FileName + "_" + l.ctx.Value("UserId").(json.Number).String() + req.MD5 + req.Ext)
+	file, _ := os.OpenFile(filepath.Join(l.svcCtx.Config.StoragePath, path), os.O_CREATE|os.O_WRONLY, 0666)
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	for i := 0; i < req.ChunkNum; i++ {
