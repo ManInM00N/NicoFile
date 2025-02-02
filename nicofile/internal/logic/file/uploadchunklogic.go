@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"io"
@@ -36,13 +37,15 @@ func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *mult
 	resp = &types.UploadChunkResponse{
 		Error: false,
 	}
-	l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ?", req.MD5, fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex)).Count(&num)
+	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	l.svcCtx.DB.Model(&model.File{}).Preload("Author").Where("md5 = ? and file_name = ? and author_id = ?", req.MD5, fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex), id).Count(&num)
 	if num >= 1 {
 		resp.Message = "文件已存在"
 		return
 	}
 	os.MkdirAll(l.svcCtx.Config.ChunkStorePath, os.ModePerm)
-	f, err := os.OpenFile(fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, req.ChunkIndex), os.O_CREATE|os.O_WRONLY, 0666)
+	storagePath := fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, req.ChunkIndex)
+	f, err := os.OpenFile(storagePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		resp.Error = true
 		resp.Message = "创建分片文件失败"
@@ -55,24 +58,32 @@ func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *mult
 	arr := util.Pool.Get().([]byte)
 	defer util.Pool.Put(arr)
 	hash := md5.New()
-
+	defer (*File).Close()
 	for {
-		len, err := (*File).Read(arr)
-		if err == io.EOF || len == 0 {
+		len, err2 := (*File).Read(arr)
+		if err2 == io.EOF || len == 0 {
 			break
+		}
+		if err2 != nil && err2 != io.EOF {
+			resp.Error = true
+			resp.Message = "上传失败"
+			f.Close()
+			os.Remove(storagePath)
+			return
 		}
 		writer.Write(arr[:len])
 		hash.Write(arr[:len])
 		writer.Flush()
 	}
-	(*File).Close()
 	f.Close()
+
 	file := model.File{
 		MD5:      hex.EncodeToString(hash.Sum(nil)),
 		FileName: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
 		IsChunk:  true,
 		Size:     Handler.Size,
 		FilePath: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
+		AuthorID: uint(id),
 	}
 	l.svcCtx.DB.Create(&file)
 	resp.Message = "上传成功"

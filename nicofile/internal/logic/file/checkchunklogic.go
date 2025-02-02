@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -33,7 +34,8 @@ func (l *CheckChunkLogic) CheckChunk(req *types.CheckChunkRequest) (resp *types.
 		Accept: req.ChunkNum,
 	}
 	var num int64
-	if l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ? and is_chunk = false", req.FileMd5, req.FileName+req.Ext).Count(&num); num >= 1 {
+	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	if l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ? and is_chunk = false and author_id = ?", req.FileMd5, req.FileName+req.Ext, id).Count(&num); num >= 1 {
 		resp.Error = false
 		resp.Message = "文件已存在"
 		resp.Accept = req.ChunkNum
@@ -41,7 +43,7 @@ func (l *CheckChunkLogic) CheckChunk(req *types.CheckChunkRequest) (resp *types.
 	}
 
 	for i, chunk := range req.MD5 {
-		err = l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ? and is_chunk = true", chunk, fmt.Sprintf("%s_%d", req.FileName, i)).Count(&num).Error
+		err = l.svcCtx.DB.Model(&model.File{}).Where("md5 = ? and file_name = ? and is_chunk = true and author_id = ?", chunk, fmt.Sprintf("%s_%d", req.FileName, i), id).Count(&num).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			resp.Error = true
 			return

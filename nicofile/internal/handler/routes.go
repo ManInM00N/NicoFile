@@ -36,7 +36,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodDelete,
-					Path:    "/file/delete/:filename",
+					Path:    "/file/delete",
 					Handler: file.FileDeleteHandler(serverCtx),
 				},
 				{
@@ -91,6 +91,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.UserExistMiddleware},
 			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/user/loadtoken",
+					Handler: user.UserLoginTokenHandler(serverCtx),
+				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/user/newname",

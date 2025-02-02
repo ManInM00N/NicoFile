@@ -15,8 +15,9 @@ type (
 		Password string `json:"password"`
 	}
 	AuthResponse {
-		Message string `json:"message"`
-		Token   string `json:"token"`
+		Message  string `json:"message"`
+		Token    string `json:"token"`
+		Username string `json:"username"`
 	}
 	NewNameRequest {
 		Indentity string `json:"indentity,optional"`
@@ -30,6 +31,15 @@ type (
 	}
 	Response {
 		Message string `json:"message"`
+	}
+	LoginTokenRequest {
+		Token string `json:"token"`
+		Id    int64  `json:"id"`
+	}
+	CheckResponse {
+		Error    bool   `json:"error"`
+		Message  string `json:"message"`
+		Username string `json:"username"`
 	}
 )
 
@@ -61,6 +71,9 @@ service nicofile-api {
 service nicofile-api {
 	@handler UserChangeNameHandler
 	post /user/newname (NewNameRequest) returns (NewNameResponse)
+
+	@handler UserLoginTokenHandler
+	post /user/loadtoken (LoginTokenRequest) returns (CheckResponse)
 }
 
 type (
@@ -80,7 +93,7 @@ type (
 	}
 	FileDownloadResponse  {}
 	FileDeleteRequest {
-		Identity string `json:"identity"`
+		FileId int64 `form:"fileid"`
 	}
 	FileDeleteResponse {
 		Message string `json:"message"`
@@ -158,7 +171,7 @@ service nicofile-api {
 	get /file/download (FileDownloadRequest) returns (FileDownloadResponse)
 
 	@handler FileDeleteHandler
-	delete /file/delete/:filename (FileDeleteRequest) returns (FileDeleteResponse)
+	delete /file/delete (FileDeleteRequest) returns (FileDeleteResponse)
 
 	@handler FileListHandler
 	post /file/list (FileListRequest) returns (FileListResponse)

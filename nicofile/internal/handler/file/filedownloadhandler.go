@@ -2,6 +2,7 @@ package file
 
 import (
 	"errors"
+	"fmt"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"gorm.io/gorm"
 	"main/model"
@@ -20,6 +21,7 @@ func FileDownloadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		var File model.File
 		if err := svcCtx.DB.Model(&model.File{}).Where("file_path = ?", req.Url).First(&File).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("Error", err)
 			w.Write([]byte("File Not Found"))
 			httpx.ErrorCtx(r.Context(), w, err)
 			return

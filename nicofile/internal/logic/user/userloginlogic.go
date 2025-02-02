@@ -37,8 +37,9 @@ func (l *UserLoginLogic) UserLogin(req *types.LoginRequest) (resp *types.AuthRes
 	}
 	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
 	resp = &types.AuthResponse{
-		Message: "登录成功",
-		Token:   token.AccessToken,
+		Message:  "登录成功",
+		Token:    token.AccessToken,
+		Username: User.Username,
 	}
 	return
 }

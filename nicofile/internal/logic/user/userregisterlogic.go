@@ -34,8 +34,9 @@ func (l *UserRegisterLogic) UserRegister(req *types.RegisterRequest) (resp *type
 	l.svcCtx.DB.Create(&User)
 	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
 	resp = &types.AuthResponse{
-		Message: "注册成功",
-		Token:   token.AccessToken,
+		Message:  "注册成功",
+		Token:    token.AccessToken,
+		Username: User.Username,
 	}
 	return
 }

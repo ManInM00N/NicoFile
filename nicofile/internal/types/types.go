@@ -9,8 +9,9 @@ type Auth struct {
 }
 
 type AuthResponse struct {
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Message  string `json:"message"`
+	Token    string `json:"token"`
+	Username string `json:"username"`
 }
 
 type CheckChunkRequest struct {
@@ -27,6 +28,12 @@ type CheckChunkResponse struct {
 	Message string `json:"message,optional"`
 }
 
+type CheckResponse struct {
+	Error    bool   `json:"error"`
+	Message  string `json:"message"`
+	Username string `json:"username"`
+}
+
 type File struct {
 	Id         uint   `json:"id"`
 	PosterId   uint   `json:"posterId"`
@@ -41,7 +48,7 @@ type File struct {
 }
 
 type FileDeleteRequest struct {
-	Identity string `json:"identity"`
+	FileId int64 `form:"fileid"`
 }
 
 type FileDeleteResponse struct {
@@ -88,6 +95,11 @@ type FileUploadResponse struct {
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type LoginTokenRequest struct {
+	Token string `json:"token"`
+	Id    int64  `json:"id"`
 }
 
 type MergeChunkRequest struct {
