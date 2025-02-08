@@ -34,17 +34,27 @@ type CheckResponse struct {
 	Username string `json:"username"`
 }
 
+type DeleteUserRequest struct {
+	Userid int64 `form:"userid"`
+}
+
+type DeleteUserResponse struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+}
+
 type File struct {
-	Id         uint   `json:"id"`
-	PosterId   uint   `json:"posterId"`
-	PosterName string `json:"posterName"`
-	MD5        string `json:"md5"`
-	Name       string `json:"name"`
-	Ext        string `json:"ext"`
-	Path       string `json:"path"`
-	Size       int64  `json:"size"`
-	Desc       string `json:"desc"`
-	CreatedAt  string `json:"createdAt"`
+	Id             uint   `json:"id"`
+	PosterId       uint   `json:"posterId"`
+	PosterName     string `json:"posterName"`
+	MD5            string `json:"md5"`
+	Name           string `json:"name"`
+	Ext            string `json:"ext"`
+	Path           string `json:"path"`
+	Size           int64  `json:"size"`
+	Desc           string `json:"desc"`
+	DonwloadCounts int64  `json:"downloadcounts"`
+	CreatedAt      string `json:"createdAt"`
 }
 
 type FileDeleteRequest struct {
@@ -70,10 +80,11 @@ type FileListRequest struct {
 }
 
 type FileListResponse struct {
-	List    []File `json:"list"`
-	Num     int    `json:"num"`
-	Error   bool   `json:"error"`
-	Message string `json:"message"`
+	List     []File `json:"list"`
+	Num      int    `json:"num"`
+	Error    bool   `json:"error"`
+	Message  string `json:"message"`
+	AllPages int    `json:"allpages"`
 }
 
 type FileMeta struct {
@@ -98,8 +109,6 @@ type LoginRequest struct {
 }
 
 type LoginTokenRequest struct {
-	Token string `json:"token"`
-	Id    int64  `json:"id"`
 }
 
 type MergeChunkRequest struct {
@@ -117,11 +126,20 @@ type MergeChunkResponse struct {
 }
 
 type NewNameRequest struct {
-	Indentity string `json:"indentity,optional"`
-	NewName   string `json:"newName"`
+	NewName string `json:"newName"`
 }
 
 type NewNameResponse struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+}
+
+type NewPasswordRequest struct {
+	NewPassword string `json:"newPassword"`
+}
+
+type NewPasswordResponse struct {
+	Error   bool   `json:"error"`
 	Message string `json:"message"`
 }
 

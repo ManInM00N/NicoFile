@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"main/model"
 
 	"main/nicofile/internal/svc"
@@ -30,13 +31,13 @@ func (l *UserLoginTokenLogic) UserLoginToken(req *types.LoginTokenRequest) (resp
 		Message:  "身份认证成功",
 		Username: "",
 	}
-	if req.Id != l.ctx.Value("UserId").(int64) {
+	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	var User model.User
+	if err = l.svcCtx.DB.Where("id = ?", id).First(&User).Error; err != nil {
 		resp.Error = true
 		resp.Message = "身份认证失败"
-	} else {
-		var User model.User
-		l.svcCtx.DB.Where("id = ?", req.Id).First(&User)
-		resp.Username = User.Username
+		return
 	}
+	resp.Username = User.Username
 	return
 }

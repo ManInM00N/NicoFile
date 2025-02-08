@@ -40,19 +40,21 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 	l.svcCtx.DB.Model(&types.File{}).Preload("Author").Where("is_chunk = 0").Offset(offset).Limit(config2.PageSize).Find(&list)
 	for _, i := range list {
 		resp.List = append(resp.List, types.File{
-			Id:         i.ID,
-			Name:       i.FileName,
-			Path:       i.FilePath,
-			Size:       i.Size,
-			PosterId:   i.AuthorID,
-			PosterName: i.Author.Username,
-			MD5:        i.MD5,
-			Ext:        i.Ext,
-			Desc:       i.Description,
-			CreatedAt:  i.CreatedAt.Format("2006-01-02 15:04:05"),
+			Id:             i.ID,
+			Name:           i.FileName,
+			Path:           i.FilePath,
+			Size:           i.Size,
+			PosterId:       i.AuthorID,
+			PosterName:     i.Author.Username,
+			MD5:            i.MD5,
+			Ext:            i.Ext,
+			Desc:           i.Description,
+			DonwloadCounts: i.DownloadTimes,
+			CreatedAt:      i.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 		fmt.Println(i.Author)
 	}
 	resp.Num = len(resp.List)
+	resp.AllPages = pages
 	return
 }

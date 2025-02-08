@@ -20,10 +20,17 @@ type (
 		Username string `json:"username"`
 	}
 	NewNameRequest {
-		Indentity string `json:"indentity,optional"`
-		NewName   string `json:"newName"`
+		NewName string `json:"newName"`
 	}
 	NewNameResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	NewPasswordRequest {
+		NewPassword string `json:"newPassword"`
+	}
+	NewPasswordResponse {
+		Error   bool   `json:"error"`
 		Message string `json:"message"`
 	}
 	Request {
@@ -32,14 +39,18 @@ type (
 	Response {
 		Message string `json:"message"`
 	}
-	LoginTokenRequest {
-		Token string `json:"token"`
-		Id    int64  `json:"id"`
-	}
+	LoginTokenRequest  {}
 	CheckResponse {
 		Error    bool   `json:"error"`
 		Message  string `json:"message"`
 		Username string `json:"username"`
+	}
+	DeleteUserRequest {
+		Userid int64 `form:"userid"`
+	}
+	DeleteUserResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
 	}
 )
 
@@ -72,8 +83,14 @@ service nicofile-api {
 	@handler UserChangeNameHandler
 	post /user/newname (NewNameRequest) returns (NewNameResponse)
 
+	@handler UserChangePasswordHandler
+	post /user/newpassword (NewPasswordRequest) returns (NewPasswordResponse)
+
 	@handler UserLoginTokenHandler
 	post /user/loadtoken (LoginTokenRequest) returns (CheckResponse)
+
+	@handler DeleteUserHandler
+	delete /user/delete (DeleteUserRequest) returns (DeleteUserResponse)
 }
 
 type (
@@ -105,22 +122,24 @@ type (
 		Size int64 `json:"size,optional"`
 	}
 	FileListResponse {
-		List    []File `json:"list"`
-		Num     int    `json:"num"`
-		Error   bool   `json:"error"`
-		Message string `json:"message"`
+		List     []File `json:"list"`
+		Num      int    `json:"num"`
+		Error    bool   `json:"error"`
+		Message  string `json:"message"`
+		AllPages int    `json:"allpages"`
 	}
 	File {
-		Id         uint   `json:"id"`
-		PosterId   uint   `json:"posterId"`
-		PosterName string `json:"posterName"`
-		MD5        string `json:"md5"`
-		Name       string `json:"name"`
-		Ext        string `json:"ext"`
-		Path       string `json:"path"`
-		Size       int64  `json:"size"`
-		Desc       string `json:"desc"`
-		CreatedAt  string `json:"createdAt"`
+		Id             uint   `json:"id"`
+		PosterId       uint   `json:"posterId"`
+		PosterName     string `json:"posterName"`
+		MD5            string `json:"md5"`
+		Name           string `json:"name"`
+		Ext            string `json:"ext"`
+		Path           string `json:"path"`
+		Size           int64  `json:"size"`
+		Desc           string `json:"desc"`
+		DonwloadCounts int64  `json:"downloadcounts"`
+		CreatedAt      string `json:"createdAt"`
 	}
 	UploadChunkRequest {
 		FileName   string `form:"filename"`

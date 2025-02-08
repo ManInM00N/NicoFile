@@ -3,6 +3,7 @@ package file
 import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 	"main/model"
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
@@ -24,7 +25,7 @@ func NewFileDownloadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *File
 }
 
 func (l *FileDownloadLogic) FileDownload(req *types.FileDownloadRequest, w http.ResponseWriter, file model.File) (resp *types.FileDownloadResponse, err error) {
-
+	l.svcCtx.DB.Model(&model.File{}).Where("file_path = ?", req.Url).UpdateColumn("download_times", gorm.Expr("download_times + ?", 1))
 	//resp = &types.FileDownloadResponse{}
 	//f, err := os.OpenFile(l.svcCtx.Config.StoragePath+"/"+file.FilePath, os.O_RDONLY, 0666)
 	////stat, _ := f.Stat()

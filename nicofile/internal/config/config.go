@@ -10,4 +10,18 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64
 	}
+	Redis struct {
+		Host     string
+		Port     int
+		Password string
+		DB       int
+		Disabled bool
+	}
+	Kafka struct {
+		Host     string
+		Port     int
+		Topic    string
+		Broker   string
+		Disabled bool
+	}
 }

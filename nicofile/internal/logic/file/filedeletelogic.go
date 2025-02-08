@@ -36,12 +36,11 @@ func (l *FileDeleteLogic) FileDelete(req *types.FileDeleteRequest) (resp *types.
 	l.svcCtx.DB.Model(&model.File{}).Where("id = ?", req.FileId).First(&file)
 	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
 	fmt.Println(id, file.ID)
-	if file.AuthorID != uint(id) || file.ID == 0 {
+	if (file.AuthorID != uint(id) && id <= 0) || file.ID == 0 {
 		resp.Message = "无权删除"
 		resp.Error = true
 		return
 	}
-
 	if err2 := l.svcCtx.DB.Unscoped().Delete(&file).Error; err2 != nil {
 		resp.Message = "删除失败或者文件不存在"
 		resp.Error = true

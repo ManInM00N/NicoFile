@@ -22,9 +22,10 @@ const basename = "/static"
 
 func main() {
 	flag.Parse()
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	if !c.Redis.Disabled {
+	}
 	os.MkdirAll(c.ChunkStorePath, os.ModePerm)
 	os.MkdirAll(c.StoragePath, os.ModePerm)
 	domains := []string{"*"}
@@ -38,7 +39,7 @@ func main() {
 		rest.WithFileServer(basename, fs),
 		rest.WithCors(domains...),
 		rest.WithCustomCors(func(header http.Header) {
-			header.Add("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token,Authorization,Token,X-Token,X-User-Id,OS,Platform, Version")
+			header.Add("Access-Control-Allow-Headers", "Content-Type,AccessToken,Range,X-CSRF-Token,Authorization,Token,X-Token,X-User-Id,OS,Platform, Version")
 			header.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH")
 			header.Set("Access-Control-Expose-Headers", "Content-Length, Content-Type")
 			header.Set("Access-Control-Allow-Origin", "*")

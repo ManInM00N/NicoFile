@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"encoding/json"
+	"main/model"
 
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
@@ -24,7 +26,20 @@ func NewUserChangeNameLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Us
 }
 
 func (l *UserChangeNameLogic) UserChangeName(req *types.NewNameRequest) (resp *types.NewNameResponse, err error) {
-	// todo: add your logic here and delete this line
-
+	resp = &types.NewNameResponse{
+		Error: false,
+	}
+	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	var User model.User
+	if l.svcCtx.DB.Model(model.User{}).Where("username = ?", req.NewName).First(&User).Error == nil && User.ID != uint(id) {
+		resp.Error = true
+		resp.Message = "用户名已存在"
+		return
+	}
+	if err = l.svcCtx.DB.Model(model.User{}).Where("id = ?", id).Update("Username", req.NewName).Error; err != nil {
+		resp.Error = true
+		resp.Message = "用户名修改失败"
+		return
+	}
 	return
 }
