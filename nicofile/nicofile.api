@@ -1,0 +1,207 @@
+syntax = "v1"
+
+type Auth {
+	AccessToken  string `json:"access_token"`
+	AccessExpire int64  `json:"access_expire"`
+}
+
+type (
+	LoginRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	RegisterRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	AuthResponse {
+		Message  string `json:"message"`
+		Token    string `json:"token"`
+		Username string `json:"username"`
+	}
+	NewNameRequest {
+		NewName string `json:"newName"`
+	}
+	NewNameResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	NewPasswordRequest {
+		NewPassword string `json:"newPassword"`
+	}
+	NewPasswordResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	Request {
+		Name string `path:"name,options=you|me"`
+	}
+	Response {
+		Message string `json:"message"`
+	}
+	LoginTokenRequest  {}
+	CheckResponse {
+		Error    bool   `json:"error"`
+		Message  string `json:"message"`
+		Username string `json:"username"`
+	}
+	DeleteUserRequest {
+		Userid int64 `form:"userid"`
+	}
+	DeleteUserResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+)
+
+service nicofile-api {
+	@handler NicofileHandler
+	get /from/:name (Request) returns (Response)
+}
+
+@server (
+	prefix:  /api/v1
+	group:   user
+	timeout: 3s
+)
+service nicofile-api {
+	@handler UserLoginHandler
+	post /user/login (LoginRequest) returns (AuthResponse)
+
+	@handler UserRegisterHandler
+	post /user/register (RegisterRequest) returns (AuthResponse)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      user
+	timeout:    3s
+	middleware: UserExistMiddleware
+	jwt:        Auth
+)
+service nicofile-api {
+	@handler UserChangeNameHandler
+	post /user/newname (NewNameRequest) returns (NewNameResponse)
+
+	@handler UserChangePasswordHandler
+	post /user/newpassword (NewPasswordRequest) returns (NewPasswordResponse)
+
+	@handler UserLoginTokenHandler
+	post /user/loadtoken (LoginTokenRequest) returns (CheckResponse)
+
+	@handler DeleteUserHandler
+	delete /user/delete (DeleteUserRequest) returns (DeleteUserResponse)
+}
+
+type (
+	FileMeta {
+		Id           int64  `json:"id"`
+		FileName     string `json:"filename"`
+		FilePath     string `json:"filepath"`
+		FileSize     int64  `json:"filesize"`
+		UploadedSize int64  `json:"uploadedsize"`
+		Status       string `json:"status"`
+		CreatedAt    string `json:"createdat"`
+	}
+	FileUploadRequest  {}
+	FileUploadResponse  {}
+	FileDownloadRequest {
+		Url string `form:"url"`
+	}
+	FileDownloadResponse  {}
+	FileDeleteRequest {
+		FileId int64 `form:"fileid"`
+	}
+	FileDeleteResponse {
+		Message string `json:"message"`
+		Error   bool   `json:"error"`
+	}
+	FileListRequest {
+		Id   int64 `json:"id,optional"`
+		Page int   `json:"page,range=[1:]"`
+		Size int64 `json:"size,optional"`
+	}
+	FileListResponse {
+		List     []File `json:"list"`
+		Num      int    `json:"num"`
+		Error    bool   `json:"error"`
+		Message  string `json:"message"`
+		AllPages int    `json:"allpages"`
+	}
+	File {
+		Id             uint   `json:"id"`
+		PosterId       uint   `json:"posterId"`
+		PosterName     string `json:"posterName"`
+		MD5            string `json:"md5"`
+		Name           string `json:"name"`
+		Ext            string `json:"ext"`
+		Path           string `json:"path"`
+		Size           int64  `json:"size"`
+		Desc           string `json:"desc"`
+		DonwloadCounts int64  `json:"downloadcounts"`
+		CreatedAt      string `json:"createdAt"`
+	}
+	UploadChunkRequest {
+		FileName   string `form:"filename"`
+		MD5        string `form:"md5"`
+		ChunkIndex int    `form:"chunkIndex"`
+	}
+	UploadChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Message string `json:"message,optional"`
+	}
+	MergeChunkRequest {
+		FileName    string `json:"filename"`
+		MD5         string `json:"md5,optional"`
+		Ext         string `json:"ext"`
+		ChunkNum    int    `json:"chunkNum,range=[1:]"`
+		Size        int64  `json:"size"`
+		Description string `json:"description,optional"`
+	}
+	MergeChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Message string `json:"message,optional"`
+	}
+	CheckChunkRequest {
+		FileName string   `json:"filename"`
+		MD5      []string `json:"md5"`
+		ChunkNum int      `json:"chunkNum"`
+		FileMd5  string   `json:"fileMd5"`
+		Ext      string   `json:"ext"`
+	}
+	CheckChunkResponse {
+		Error   bool   `json:"error,options=true|false"`
+		Accept  int    `json:"accept,range=[0:]"`
+		Message string `json:"message,optional"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	jwt:        Auth
+	middleware: UserExistMiddleware
+	group:      file
+)
+service nicofile-api {
+	@handler FileUploadHandler
+	post /file/upload (FileUploadRequest) returns (FileUploadResponse)
+
+	@handler FileDownloadHandler
+	get /file/download (FileDownloadRequest) returns (FileDownloadResponse)
+
+	@handler FileDeleteHandler
+	delete /file/delete (FileDeleteRequest) returns (FileDeleteResponse)
+
+	@handler FileListHandler
+	post /file/list (FileListRequest) returns (FileListResponse)
+
+	@handler UploadChunkHandler
+	post /file/uploadchunk (UploadChunkRequest) returns (UploadChunkResponse)
+
+	@handler MergeChunkHandler
+	post /file/mergechunk (MergeChunkRequest) returns (MergeChunkResponse)
+
+	@handler CheckChunkHandler
+	post /file/checkchunk (CheckChunkRequest) returns (CheckChunkResponse)
+}
+

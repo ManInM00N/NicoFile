@@ -1,0 +1,22 @@
+Name: nicofile-api
+Host: 0.0.0.0
+Port: 8888
+MaxBytes: 5345280
+MaxConns: 100
+Auth:
+  AccessSecret: "114514_1919810"
+  AccessExpire: 603600
+ChunkStorePath: "chunkstore"
+StoragePath: "storage"
+Redis:
+    Host: ""
+    Port: 6379
+    Password: ""
+    DB: 0
+    Disabled: false
+Kafka:
+    Brokers: ""
+    Topic: ""
+    Host: ""
+    Port: 0
+    Disabled: true
