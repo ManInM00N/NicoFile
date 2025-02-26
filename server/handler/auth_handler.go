@@ -8,19 +8,19 @@ import (
 	"main/config"
 	"main/model"
 	"main/pkg/jwt"
-	"main/server/proto"
+	"main/server/proto/auth"
 )
 
 type AuthServiceServer struct {
-	proto.UnimplementedAuthServiceServer
+	auth.UnimplementedAuthServiceServer
 }
 
-func (s *AuthServiceServer) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
+func (s *AuthServiceServer) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginResponse, error) {
 	var user model.User
 	result := config.DB.Where("username = ?", req.Username).First(&user)
 
 	if result.Error != nil {
-		return &proto.LoginResponse{
+		return &auth.LoginResponse{
 			Success: false,
 			Message: "User not found",
 		}, nil
@@ -28,24 +28,24 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *proto.LoginRequest) 
 	// 比对密码
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		return &proto.LoginResponse{
+		return &auth.LoginResponse{
 			Success: false,
 			Message: "Invalid password",
 		}, nil
 	}
 
-	return &proto.LoginResponse{
+	return &auth.LoginResponse{
 		Success: true,
 		Message: "Login successful",
 	}, nil
 }
 
-func (s *AuthServiceServer) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
+func (s *AuthServiceServer) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	var user model.User
 	result := config.DB.Where("username = ?", req.Username).First(&user)
 	user.Username = req.Username
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		return &proto.RegisterResponse{
+		return &auth.RegisterResponse{
 			Success: false,
 			Message: "User name existed",
 			Cookie:  "",
@@ -61,7 +61,7 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *proto.RegisterReq
 			AccessExpire: 3600,
 			Fields:       map[string]interface{}{"UserId": user.ID},
 		})
-	return &proto.RegisterResponse{
+	return &auth.RegisterResponse{
 		Success: true,
 		Message: "Register Successful",
 		Cookie:  cookie.AccessToken,

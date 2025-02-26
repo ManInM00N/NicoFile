@@ -11,11 +11,13 @@ type Config struct {
 		AccessExpire int64
 	}
 	Redis struct {
-		Host     string
-		Port     int
-		Password string
-		DB       int
-		Disabled bool
+		Host            string
+		Port            int
+		Password        string
+		DB              int
+		Disabled        bool
+		Expire          int64
+		RefreshInterval int64
 	}
 	Kafka struct {
 		Host     string

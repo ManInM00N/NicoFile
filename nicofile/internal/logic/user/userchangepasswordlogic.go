@@ -32,7 +32,7 @@ func (l *UserChangePasswordLogic) UserChangePassword(req *types.NewPasswordReque
 	}
 	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
 	Password := encrypt.EncPassword(req.NewPassword)
-	if err = l.svcCtx.DB.Model(model.User{}).Where("id = ?", id).Update("Password", Password).Error; err != nil {
+	if err = l.svcCtx.DB.Model(model.User{}).Select("id,password").Where("id = ?", id).Update("Password", Password).Error; err != nil {
 		resp.Error = true
 		resp.Message = "密码修改失败"
 	}

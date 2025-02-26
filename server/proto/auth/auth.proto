@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package="./server/proto";
+option go_package="./server/proto/auth";
 package auth;
 
 service AuthService {
@@ -29,6 +29,5 @@ message RegisterResponse {
     string message = 2;
     string cookie = 3;
 }
-
 
 

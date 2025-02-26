@@ -2,9 +2,12 @@ package file
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"gorm.io/gorm"
 	config2 "main/config"
 	"main/model"
+	"main/pkg/util"
+	"strconv"
 
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
@@ -32,14 +35,25 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 		Error: false,
 	}
 	tot := int64(0)
-	l.svcCtx.DB.Model(&types.File{}).Where("is_chunk = 0").Count(&tot)
+	l.svcCtx.DB.Model(&model.File{}).Count(&tot)
 	pages := (int(tot) + config2.PageSize - 1) / config2.PageSize
 	req.Page = min(req.Page, pages)
 	offset := (req.Page - 1) * config2.PageSize
 	var list []model.File
-	l.svcCtx.DB.Model(&types.File{}).Preload("Author").Where("is_chunk = 0").Offset(offset).Limit(config2.PageSize).Find(&list)
+	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	err2 := l.svcCtx.DB.Model(&model.File{}).Preload("Author", func(db *gorm.DB) *gorm.DB {
+		return db.Select("id, username").Where("id = ?", id)
+	}).
+		Select("id,file_name,file_path,size,author_id,md5,ext,description,download_times,created_at").
+		Where("author_id = ? or ?", id, id == 6).
+		Offset(offset).
+		Limit(config2.PageSize).
+		Find(&list).Error
+	if err2 != nil {
+		util.Log.Errorf("query list error: %v\n", err2)
+	}
 	for _, i := range list {
-		resp.List = append(resp.List, types.File{
+		tmp := types.File{
 			Id:             i.ID,
 			Name:           i.FileName,
 			Path:           i.FilePath,
@@ -51,10 +65,17 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 			Desc:           i.Description,
 			DonwloadCounts: i.DownloadTimes,
 			CreatedAt:      i.CreatedAt.Format("2006-01-02 15:04:05"),
-		})
-		fmt.Println(i.Author)
+		}
+		if !l.svcCtx.Config.Redis.Disabled {
+			result, _ := l.svcCtx.Rdb.HGet(context.Background(), "file:"+strconv.Itoa(int(i.ID)), "download_times").Result()
+			v, _ := strconv.Atoi(result)
+			tmp.DonwloadCounts = int64(v)
+		}
+		resp.List = append(resp.List, tmp)
 	}
+
 	resp.Num = len(resp.List)
 	resp.AllPages = pages
+	resp.Page = req.Page
 	return
 }

@@ -9,6 +9,7 @@ type Auth struct {
 }
 
 type AuthResponse struct {
+	Error    bool   `json:"error"`
 	Message  string `json:"message"`
 	Token    string `json:"token"`
 	Username string `json:"username"`
@@ -85,6 +86,7 @@ type FileListResponse struct {
 	Error    bool   `json:"error"`
 	Message  string `json:"message"`
 	AllPages int    `json:"allpages"`
+	Page     int    `json:"page"`
 }
 
 type FileMeta struct {
@@ -160,6 +162,7 @@ type UploadChunkRequest struct {
 	FileName   string `form:"filename"`
 	MD5        string `form:"md5"`
 	ChunkIndex int    `form:"chunkIndex"`
+	Ext        string `form:"ext"`
 }
 
 type UploadChunkResponse struct {

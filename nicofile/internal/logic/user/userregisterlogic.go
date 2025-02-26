@@ -2,12 +2,15 @@ package user
 
 import (
 	"context"
+	"github.com/IBM/sarama"
+	"google.golang.org/protobuf/proto"
 	"main/model"
 	"main/pkg/encrypt"
 	"main/pkg/jwt"
 
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
+	"main/server/proto/kafka"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,16 +30,33 @@ func NewUserRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 }
 
 func (l *UserRegisterLogic) UserRegister(req *types.RegisterRequest) (resp *types.AuthResponse, err error) {
-	// todo: add your logic here and delete this line
+	resp = &types.AuthResponse{
+		Error: false,
+	}
 	var User model.User
 	User.Username = req.Username
 	User.Password = encrypt.EncPassword(req.Password)
-	l.svcCtx.DB.Create(&User)
-	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
-	resp = &types.AuthResponse{
-		Message:  "注册成功",
-		Token:    token.AccessToken,
-		Username: User.Username,
+	err2 := l.svcCtx.DB.Create(&User).Error
+	if err2 != nil {
+		resp.Error = true
+		resp.Message = "名称非法或已存在"
+		return
 	}
+	if !l.svcCtx.Config.Kafka.Disabled {
+		event := &kafka.UserMonitor{
+			Message: "A new user has been registered",
+			Warning: false,
+			UserId:  uint32(User.ID),
+		}
+		data, _ := proto.Marshal(event)
+		(*l.svcCtx.Producer).Input() <- &sarama.ProducerMessage{
+			Topic: "data-monitor-test", // l.svcCtx.Config.Kafka.Topic,
+			Value: sarama.ByteEncoder(data),
+		}
+	}
+	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
+	resp.Message = "注册成功"
+	resp.Token = token.AccessToken
+	resp.Username = User.Username
 	return
 }

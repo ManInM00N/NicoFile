@@ -28,7 +28,7 @@ func NewUserLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserLog
 
 func (l *UserLoginLogic) UserLogin(req *types.LoginRequest) (resp *types.AuthResponse, err error) {
 	var User model.User
-	l.svcCtx.DB.Where("username = ?", req.Username).First(&User)
+	l.svcCtx.DB.Model(&model.User{}).Select("id,username,password").Where("username = ?", req.Username).First(&User)
 	if encrypt.EncPassword(req.Password) != User.Password {
 		resp = &types.AuthResponse{
 			Message: "账号或者密码错误",

@@ -1,7 +1,6 @@
 package file
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,14 +24,13 @@ func UploadChunkHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		req.ChunkIndex, _ = strconv.Atoi(r.FormValue("chunkIndex"))
 		req.FileName = r.FormValue("filename")
 		req.MD5 = r.FormValue("md5")
-		fmt.Println(req.ChunkIndex, req.FileName, req.MD5)
+		req.Ext = r.FormValue("ext")
 		//var err error
 		File, handler, err := r.FormFile("chunk")
 		if err != nil || File == nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
-		fmt.Println(handler.Size, handler.Filename, handler.Header)
 		l := file.NewUploadChunkLogic(r.Context(), svcCtx)
 		resp, err := l.UploadChunk(&req, &File, handler)
 		if err != nil {

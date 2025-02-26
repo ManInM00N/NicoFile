@@ -9,14 +9,16 @@ Auth:
 ChunkStorePath: "chunkstore"
 StoragePath: "storage"
 Redis:
-    Host: ""
-    Port: 6379
+    Host: "127.0.0.1:"
+    Port: 6380
     Password: ""
     DB: 0
     Disabled: false
+    Expire: 540
+    RefreshInterval: 300
 Kafka:
-    Brokers: ""
+    Broker: ""
     Topic: ""
-    Host: ""
-    Port: 0
-    Disabled: true
+    Host: "127.0.0.1:"
+    Port: 9092
+    Disabled: false

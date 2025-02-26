@@ -15,6 +15,7 @@ type (
 		Password string `json:"password"`
 	}
 	AuthResponse {
+		Error    bool   `json:"error"`
 		Message  string `json:"message"`
 		Token    string `json:"token"`
 		Username string `json:"username"`
@@ -127,6 +128,7 @@ type (
 		Error    bool   `json:"error"`
 		Message  string `json:"message"`
 		AllPages int    `json:"allpages"`
+		Page     int    `json:"page"`
 	}
 	File {
 		Id             uint   `json:"id"`
@@ -145,6 +147,7 @@ type (
 		FileName   string `form:"filename"`
 		MD5        string `form:"md5"`
 		ChunkIndex int    `form:"chunkIndex"`
+		Ext        string `form:"ext"`
 	}
 	UploadChunkResponse {
 		Error   bool   `json:"error,options=true|false"`

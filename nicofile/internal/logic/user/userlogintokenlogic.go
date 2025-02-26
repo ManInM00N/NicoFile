@@ -33,7 +33,7 @@ func (l *UserLoginTokenLogic) UserLoginToken(req *types.LoginTokenRequest) (resp
 	}
 	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
 	var User model.User
-	if err = l.svcCtx.DB.Where("id = ?", id).First(&User).Error; err != nil {
+	if err = l.svcCtx.DB.Model(&model.User{}).Select("id,username").Where("id = ?", id).First(&User).Error; err != nil {
 		resp.Error = true
 		resp.Message = "身份认证失败"
 		return

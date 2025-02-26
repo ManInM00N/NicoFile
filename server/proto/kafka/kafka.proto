@@ -1,0 +1,14 @@
+syntax = "proto3";
+option go_package = "go_package=./server/proto/kafka";
+package kafka;
+
+message FileMonitor{
+  uint32 user_id = 1;
+  string message = 2;
+  bool warning = 3;
+}
+message UserMonitor{
+  uint32 user_id = 1;
+  string message = 2;
+  bool warning = 3;
+}

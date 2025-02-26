@@ -1,12 +1,19 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+	"main/model"
+	"main/pkg/util"
+	CacheRedis "main/redis"
 	"net/http"
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"main/nicofile/internal/config"
 	"main/nicofile/internal/handler"
@@ -17,15 +24,16 @@ import (
 )
 
 var configFile = flag.String("f", "nicofile/etc/nicofile-api.yaml", "the config file")
+var inTest = flag.Lookup("test.v") != nil
 
 const basename = "/static"
 
 func main() {
+	util.NewLog("nicofile-log")
 	flag.Parse()
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	if !c.Redis.Disabled {
-	}
+
 	os.MkdirAll(c.ChunkStorePath, os.ModePerm)
 	os.MkdirAll(c.StoragePath, os.ModePerm)
 	domains := []string{"*"}
@@ -48,9 +56,50 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
+	if !c.Redis.Disabled {
+		util.Log.Println("Transport redis cache...")
+		var list []model.File
+		offset := 0
+		ctxx := context.Background()
+		counts := 0
+		for {
+			if err := ctx.DB.
+				Model(&model.File{}).
+				Select("id,file_name,file_path,author_id,description,download_times").
+				Offset(offset).
+				Limit(10000).
+				Find(&list).Error; err != nil {
+				util.Log.Errorf("Failed to scan keys from SQLite: %v", err)
+				return
+			}
+			if len(list) == 0 {
+				break
+			}
+			counts += len(list)
+			for _, v := range list {
+				ctx.Rdb.HSet(ctxx, fmt.Sprintf("file:%d", v.ID), "download_times", v.DownloadTimes, "description", v.Description, "author_id", v.AuthorID, "file_path", v.FilePath)
+			}
+			offset += 10000
+		}
+		util.Log.Println("Transport redis cache done, total:", counts)
+		go func(rdb *redis.Client, DB *gorm.DB) {
+			timer := time.NewTimer(time.Duration(c.Redis.RefreshInterval) * time.Second)
+			for range timer.C {
+				CacheRedis.Transport(ctx.Rdb, ctx.DB)
+			}
+		}(ctx.Rdb, ctx.DB)
+		defer CacheRedis.Transport(ctx.Rdb, ctx.DB)
+	}
+	if !c.Kafka.Disabled {
+		defer func() {
+			if err := (*ctx.Producer).Close(); err != nil {
+				util.Log.Errorf("Error closing Kafka producer: %v", err)
+			}
+		}()
+	}
 	handler.RegisterHandlers(server, ctx)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	util.Log.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }
 

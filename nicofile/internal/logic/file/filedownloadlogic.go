@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 	"main/model"
@@ -25,7 +26,12 @@ func NewFileDownloadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *File
 }
 
 func (l *FileDownloadLogic) FileDownload(req *types.FileDownloadRequest, w http.ResponseWriter, file model.File) (resp *types.FileDownloadResponse, err error) {
-	l.svcCtx.DB.Model(&model.File{}).Where("file_path = ?", req.Url).UpdateColumn("download_times", gorm.Expr("download_times + ?", 1))
+	if !l.svcCtx.Config.Redis.Disabled {
+		key := fmt.Sprintf("file:%d", file.ID)
+		l.svcCtx.Rdb.HIncrBy(context.Background(), key, "download_times", 1)
+	} else {
+		l.svcCtx.DB.Model(&model.File{}).Where("file_path = ?", req.Url).UpdateColumn("download_times", gorm.Expr("download_times + ?", 1))
+	}
 	//resp = &types.FileDownloadResponse{}
 	//f, err := os.OpenFile(l.svcCtx.Config.StoragePath+"/"+file.FilePath, os.O_RDONLY, 0666)
 	////stat, _ := f.Stat()

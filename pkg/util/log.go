@@ -1,92 +1,51 @@
 package util
 
 import (
-	"flag"
-	"fmt"
-	"io"
-	"log"
-	"os"
-	"sync"
-	"time"
+	"github.com/orandin/lumberjackrus"
+	"github.com/sirupsen/logrus"
+	"path/filepath"
 )
 
-var (
-	DebugLog  *logger
-	InfoLog   *logger
-	ErrorLog  *logger
-	debugmode = flag.Bool("dev", false, "是否启用debug日志")
-)
+var Log *logrus.Logger
 
-type logger struct {
-	sync.Mutex
-	out        *log.Logger
-	fileprefix string
-	filename   string
-	logfile    *os.File
-	dev        bool
+func NewLog(prefix string) {
+	Log = logrus.New()
+	Log.AddHook(newRotateHook(prefix))
+	return
 }
-
-func (lg *logger) Println(data ...any) {
-	lg.Lock()
-	defer lg.Unlock()
-	if lg.dev {
-		return
+func newRotateHook(prefix string) logrus.Hook {
+	hook, err := lumberjackrus.NewHook(
+		&lumberjackrus.LogFile{ // 通用日志配置
+			Filename:   filepath.Join(prefix, "general.log"),
+			MaxSize:    100,
+			MaxBackups: 1,
+			MaxAge:     1,
+			Compress:   false,
+			LocalTime:  true,
+		},
+		logrus.InfoLevel,
+		&logrus.TextFormatter{DisableColors: true},
+		&lumberjackrus.LogFileOpts{ // 针对不同日志级别的配置
+			logrus.TraceLevel: &lumberjackrus.LogFile{
+				Filename:   filepath.Join(prefix, "trace.log"),
+				MaxSize:    10,   // 日志文件在轮转之前的最大大小，默认 100 MB
+				MaxBackups: 10,   // 保留旧日志文件的最大数量
+				MaxAge:     10,   // 保留旧日志文件的最大天数
+				Compress:   true, // 是否使用 gzip 对日志文件进行压缩归档
+				LocalTime:  true, // 是否使用本地时间，默认 UTC 时间
+			},
+			logrus.ErrorLevel: &lumberjackrus.LogFile{
+				Filename:   filepath.Join(prefix, "error.log"),
+				MaxSize:    10,   // 日志文件在轮转之前的最大大小，默认 100 MB
+				MaxBackups: 10,   // 保留旧日志文件的最大数量
+				MaxAge:     10,   // 保留旧日志文件的最大天数
+				Compress:   true, // 是否使用 gzip 对日志文件进行压缩归档
+				LocalTime:  true, // 是否使用本地时间，默认 UTC 时间
+			},
+		},
+	)
+	if err != nil {
+		panic(err)
 	}
-	lg.checkdate()
-	lg.out.Println(data...)
-}
-
-func (lg *logger) Printf(str string, data ...any) {
-	lg.Lock()
-	defer lg.Unlock()
-	if lg.dev {
-		return
-	}
-	lg.checkdate()
-	lg.out.Printf(str, data...)
-}
-
-func NewLogger(out io.Writer, prefix string, flag int, fileprefix string) *logger {
-	return &logger{
-		out:        log.New(out, prefix, flag),
-		fileprefix: fileprefix,
-	}
-}
-
-func init() {
-	T := time.Now()
-	os.MkdirAll("log", os.ModePerm)
-	logfile := fmt.Sprintf("log/%04d-%02d-%02d.log", T.Year(), T.Month(), T.Day())
-	errorfile := fmt.Sprintf("log/error%04d-%02d-%02d.log", T.Year(), T.Month(), T.Day())
-	debugfile := fmt.Sprintf("log/debug%04d-%02d-%02d.log", T.Year(), T.Month(), T.Day())
-	logf, _ := os.OpenFile(logfile, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
-	debugf, _ := os.OpenFile(debugfile, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
-	errorf, _ := os.OpenFile(errorfile, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
-	InfoLog = NewLogger(logf, "[Info]  - ", log.Ltime, "")
-	// InfoLog.Mutex = sync.Mutex{}
-	DebugLog = NewLogger(debugf, "[Debug] - ", log.Ltime, "debug")
-	DebugLog.dev = !*debugmode
-	// DebugLog.Mutex = sync.Mutex{}
-	ErrorLog = NewLogger(errorf, "[Error] - ", log.Ltime, "error")
-	// ErrorLog.Mutex = sync.Mutex{}
-	InfoLog.logfile = logf
-	DebugLog.logfile = debugf
-	ErrorLog.logfile = errorf
-	InfoLog.filename = logfile
-	ErrorLog.filename = errorfile
-	DebugLog.filename = debugfile
-	ErrorLog.Println("Error Start logging", T.String())
-	InfoLog.Println("Error Start logging", T.String())
-	DebugLog.Println("Error Start logging", T.String())
-}
-
-func (lg *logger) checkdate() {
-	//T := time.Now()
-	//tmp := fmt.Sprintf("log/%s%04d-%02d-%02d.log", lg.fileprefix, T.Year(), T.Month(), T.Day())
-	//if tmp != lg.filename {
-	//	lg.filename = tmp
-	//	lg.logfile.Close()
-	//	lg.logfile, _ = os.OpenFile(lg.filename, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
-	//	lg.out.SetOutput(lg.logfile)
-	//}
+	return hook
 }

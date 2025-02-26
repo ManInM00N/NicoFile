@@ -15,6 +15,7 @@ import (
 	"main/pkg/util"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 )
 
 type UploadChunkLogic struct {
@@ -32,29 +33,33 @@ func NewUploadChunkLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Uploa
 }
 
 func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *multipart.File, Handler *multipart.FileHeader) (resp *types.UploadChunkResponse, err error) {
-	// todo: add your logic here and delete this line
 	num := int64(0)
 	resp = &types.UploadChunkResponse{
 		Error: false,
 	}
 	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
-	l.svcCtx.DB.Model(&model.File{}).Preload("Author").Where("md5 = ? and file_name = ? and author_id = ?", req.MD5, fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex), id).Count(&num)
+	var chunk model.Chunk
+	l.svcCtx.DB.Model(&model.Chunk{}).Select("id,md5,file_path").Where("file_name = ? and chunk_index = ? and author_id = ? and ext = ?", req.FileName, req.ChunkIndex, id, req.Ext).First(&chunk).Count(&num)
+	storagePath := fmt.Sprintf("%s/%d", l.svcCtx.Config.ChunkStorePath, id)
+	filePath := fmt.Sprintf("%s/%s_%d", storagePath, req.FileName, req.ChunkIndex)
 	if num >= 1 {
-		resp.Message = "文件已存在"
-		return
+		if chunk.MD5 == req.MD5 {
+			resp.Message = "文件已存在"
+			return
+		} else {
+			os.Remove(filepath.Join(l.svcCtx.Config.ChunkStorePath, chunk.FilePath))
+			l.svcCtx.DB.Unscoped().Model(&model.File{}).Delete(&chunk)
+		}
 	}
-	os.MkdirAll(l.svcCtx.Config.ChunkStorePath, os.ModePerm)
-	storagePath := fmt.Sprintf("%s/%s_%d", l.svcCtx.Config.ChunkStorePath, req.FileName, req.ChunkIndex)
-	f, err := os.OpenFile(storagePath, os.O_CREATE|os.O_WRONLY, 0666)
+	os.MkdirAll(storagePath, os.ModePerm)
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		resp.Error = true
 		resp.Message = "创建分片文件失败"
+		util.Log.Errorf("create chunk file error: %v\n", err)
 		return resp, nil
 	}
-	//bucket := ratelimit.NewBucket(20*time.Microsecond, 5)
 	writer := bufio.NewWriter(f)
-	//W := ratelimit.Writer(writer, bucket)
-
 	arr := util.Pool.Get().([]byte)
 	defer util.Pool.Put(arr)
 	hash := md5.New()
@@ -68,7 +73,7 @@ func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *mult
 			resp.Error = true
 			resp.Message = "上传失败"
 			f.Close()
-			os.Remove(storagePath)
+			os.Remove(filePath)
 			return
 		}
 		writer.Write(arr[:len])
@@ -77,15 +82,17 @@ func (l *UploadChunkLogic) UploadChunk(req *types.UploadChunkRequest, File *mult
 	}
 	f.Close()
 
-	file := model.File{
-		MD5:      hex.EncodeToString(hash.Sum(nil)),
-		FileName: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
-		IsChunk:  true,
-		Size:     Handler.Size,
-		FilePath: fmt.Sprintf("%s_%d", req.FileName, req.ChunkIndex),
-		AuthorID: uint(id),
+	chunk = model.Chunk{
+		MD5:        hex.EncodeToString(hash.Sum(nil)),
+		FileName:   req.FileName,
+		ChunkIndex: req.ChunkIndex,
+		Size:       Handler.Size,
+		Ext:        req.Ext,
+		FilePath:   fmt.Sprintf("%d/%s_%d", id, req.FileName, req.ChunkIndex),
+		AuthorID:   uint(id),
 	}
-	l.svcCtx.DB.Create(&file)
+	chunk.ID = 0
+	err = l.svcCtx.DB.Create(&chunk).Error
 	resp.Message = "上传成功"
 	return
 }

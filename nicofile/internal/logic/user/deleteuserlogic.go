@@ -3,7 +3,10 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"github.com/IBM/sarama"
+	"google.golang.org/protobuf/proto"
 	"main/model"
+	"main/server/proto/kafka"
 
 	"main/nicofile/internal/svc"
 	"main/nicofile/internal/types"
@@ -38,6 +41,20 @@ func (l *DeleteUserLogic) DeleteUser(req *types.DeleteUserRequest) (resp *types.
 	if err2 := l.svcCtx.DB.Unscoped().Delete(&model.User{}, req.Userid).Error; err2 != nil {
 		resp.Message = "删除失败或者用户不存在"
 		resp.Error = true
+	} else {
+		resp.Message = "删除成功"
+		if !l.svcCtx.Config.Kafka.Disabled {
+			event := &kafka.UserMonitor{
+				Message: "A user has been deleted",
+				Warning: false,
+				UserId:  uint32(req.Userid),
+			}
+			data, _ := proto.Marshal(event)
+			(*l.svcCtx.Producer).Input() <- &sarama.ProducerMessage{
+				Topic: "user-monitor",
+				Value: sarama.ByteEncoder(data),
+			}
+		}
 	}
 
 	return

@@ -20,7 +20,7 @@ func FileDownloadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		var File model.File
-		if err := svcCtx.DB.Model(&model.File{}).Where("file_path = ?", req.Url).First(&File).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := svcCtx.DB.Model(&model.File{}).Select("id,file_path,file_name,description,download_times,author_id").Where("file_path = ?", req.Url).First(&File).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			fmt.Println("Error", err)
 			w.Write([]byte("File Not Found"))
 			httpx.ErrorCtx(r.Context(), w, err)
@@ -36,7 +36,7 @@ func FileDownloadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		//w.Header().Set("Content-Length", strconv.FormatInt(File.Size, 10))
 		l := file.NewFileDownloadLogic(r.Context(), svcCtx)
-
+		fmt.Println()
 		_, err := l.FileDownload(&req, w, File)
 		//f, err := os.OpenFile(svcCtx.Config.StoragePath+"/"+File.FilePath, os.O_RDONLY, 0666)
 		//defer f.Close()
