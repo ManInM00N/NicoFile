@@ -22,3 +22,7 @@ Kafka:
     Host: "127.0.0.1:"
     Port: 9092
     Disabled: false
+Prometheus:
+    Host: 0.0.0.0
+    Port: 29091
+    Path: /metrics

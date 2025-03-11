@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s  # 抓取间隔
+  evaluation_interval: 15s  # 规则评估间隔
+
+scrape_configs:
+  - job_name: 'go-zero-service'
+    static_configs:
+      - targets: ['localhost:29091']  # Go-Zero 服务的 Prometheus 指标地址
+    labels: [
+
+    ]

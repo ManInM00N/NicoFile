@@ -1,9 +1,10 @@
 package kafka
 
 import (
+	"context"
 	"github.com/IBM/sarama"
+	"go.etcd.io/etcd/client/v3"
 	"main/pkg/util"
-	"strconv"
 	"time"
 )
 
@@ -26,6 +27,45 @@ func Subscribe(disabled bool, host string, port int) *sarama.AsyncProducer {
 	if disabled {
 		return nil
 	}
+	etcdClient, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379"}, // Etcd 地址
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		util.Log.Fatalf("Failed to connect to Etcd: %v", err)
+	}
+	defer etcdClient.Close()
+
+	brokerAddr := getKafkaBrokerFromEtcd(etcdClient)
+	util.Log.Printf("Using Kafka broker: %s\n", brokerAddr)
+
+	producer, err := createKafkaProducer(brokerAddr)
+	if err != nil {
+		util.Log.Fatalf("Failed to create Kafka producer: %v", err)
+	}
+
+	(*producer).Input() <- &sarama.ProducerMessage{
+		Topic: "data-monitor-test",
+		Value: sarama.StringEncoder("test"),
+	}
+	return producer
+}
+
+// 从 Etcd 获取 Kafka Broker 地址
+func getKafkaBrokerFromEtcd(etcdClient *clientv3.Client) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	resp, err := etcdClient.Get(ctx, "/kafka/config/brokers")
+	cancel()
+	if err != nil {
+		util.Log.Fatalf("Failed to get Kafka broker address from Etcd: %v", err)
+	}
+	if len(resp.Kvs) == 0 {
+		util.Log.Fatalf("No Kafka broker address found in Etcd")
+	}
+	return string(resp.Kvs[0].Value)
+}
+
+func createKafkaProducer(brokerAddr string) (*sarama.AsyncProducer, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -37,26 +77,21 @@ func Subscribe(disabled bool, host string, port int) *sarama.AsyncProducer {
 	config.Producer.Retry.Max = 5                      // 最大重试次数
 	config.Producer.Return.Successes = true            // 接收成功发送的消息
 	config.Producer.Return.Errors = true               // 接收发送失败的消息
-	producer, err := sarama.NewAsyncProducer([]string{host + strconv.Itoa(port)}, config)
+
+	producer, err := sarama.NewAsyncProducer([]string{brokerAddr}, config)
 	if err != nil {
 		panic(err)
 	}
-	// 处理成功发送的消息
 	go func() {
 		for msg := range producer.Successes() {
 			util.Log.Printf("Message sent successfully! Topic: %s, Partition: %d, Offset: %d\n",
 				msg.Topic, msg.Partition, msg.Offset)
 		}
 	}()
-	// 处理发送失败的消息
 	go func() {
 		for err := range producer.Errors() {
 			util.Log.Errorf("Failed to send message: %v\n", err)
 		}
 	}()
-	producer.Input() <- &sarama.ProducerMessage{
-		Topic: "data-monitor-test",
-		Value: sarama.StringEncoder("test"),
-	}
-	return &producer
+	return &producer, nil
 }

@@ -70,7 +70,6 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		DB.Model(&model.File{}).Save(&list)
 		//rdb.Del(ctx, keys...)
 		counts += len(keys)
-		fmt.Println(keys)
 		keyp.Put(keys)
 		if cursor == 0 {
 			break

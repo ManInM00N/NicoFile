@@ -7,6 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"log"
+	config2 "main/config"
+	"main/model"
 	"main/pkg/util"
 	"main/server/proto/auth"
 	"main/server/proto/kafka"
@@ -104,6 +106,9 @@ func _() {
 func main() {
 	util.NewLog("monitor-log")
 	util.Log.Println("monitor started")
+	DB := config2.InitDB()
+	DB.Model(&model.User{}).Count(&Users)
+	DB.Model(&model.File{}).Count(&Files)
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest

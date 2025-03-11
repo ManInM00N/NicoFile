@@ -7,6 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"main/model"
+	"main/nicofile/internal/middleware"
 	"main/pkg/util"
 	CacheRedis "main/redis"
 	"net/http"
@@ -96,6 +97,9 @@ func main() {
 				util.Log.Errorf("Error closing Kafka producer: %v", err)
 			}
 		}()
+	}
+	if c.DevServer.EnableMetrics {
+		server.Use(middleware.PrometheusMiddleware)
 	}
 	handler.RegisterHandlers(server, ctx)
 
