@@ -3,6 +3,61 @@
 
 package types
 
+type Article struct {
+	Id        int64  `json:"id"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"createdat"`
+	View      int64  `json:"view"`
+}
+
+type ArticleCreateRequest struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+type ArticleDeleteRequest struct {
+	Id int64 `path:"id"`
+}
+
+type ArticleDeleteResponse struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+}
+
+type ArticleListRequest struct {
+	Page int `json:"page"`
+	Size int `json:"size"`
+}
+
+type ArticleListResponse struct {
+	List     []Article `json:"list"`
+	Num      int       `json:"num"`
+	Error    bool      `json:"error"`
+	Message  string    `json:"message"`
+	AllPages int       `json:"allpages"`
+	Page     int       `json:"page"`
+}
+
+type ArticleRequest struct {
+	Id int64 `path:"id"`
+}
+
+type ArticleResponse struct {
+	Error     bool   `json:"error"`
+	Message   string `json:"message"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"createdat"`
+	View      string `json:"view"`
+}
+
+type ArticleUpdateRequest struct {
+	Id      int64  `path:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
 type Auth struct {
 	AccessToken  string `json:"access_token"`
 	AccessExpire int64  `json:"access_expire"`

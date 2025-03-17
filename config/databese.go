@@ -34,6 +34,7 @@ func InitDB() *gorm.DB {
 		&model.User{},
 		&model.File{},
 		&model.Chunk{},
+		&model.Article{},
 	) // 自动迁移 User 模型
 	if err != nil {
 		util.Log.Fatalln("Table User failed Migrate")

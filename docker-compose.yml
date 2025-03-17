@@ -73,7 +73,7 @@ services:
     ports:
       - "29090:9090"  # Prometheus Web UI 端口
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # 挂载 Prometheus 配置文件
+      - ./nicofile/etc/prometheus.yml:/etc/prometheus/prometheus.yml  # 挂载 Prometheus 配置文件
     networks:
       - monitoring-network
 

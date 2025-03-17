@@ -208,3 +208,75 @@ service nicofile-api {
 	post /file/checkchunk (CheckChunkRequest) returns (CheckChunkResponse)
 }
 
+type (
+	Article {
+		Id        int64  `json:"id"`
+		Title     string `json:"title"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdat"`
+		View      int64  `json:"view"`
+	}
+	ArticleCreateRequest {
+		Title   string `json:"title"`
+		Content string `json:"content"`
+	}
+	ArticleDeleteRequest {
+		Id int64 `path:"id"`
+	}
+	ArticleDeleteResponse {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	ArticleResponse {
+		Error     bool   `json:"error"`
+		Message   string `json:"message"`
+		Title     string `json:"title"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdat"`
+		View      string `json:"view"`
+	}
+	ArticleListRequest {
+		Page int `json:"page"`
+		Size int `json:"size"`
+	}
+	ArticleListResponse {
+		List     []Article `json:"list"`
+		Num      int       `json:"num"`
+		Error    bool      `json:"error"`
+		Message  string    `json:"message"`
+		AllPages int       `json:"allpages"`
+		Page     int       `json:"page"`
+	}
+	ArticleUpdateRequest {
+		Id      int64  `path:"id"`
+		Title   string `json:"title"`
+		Content string `json:"content"`
+	}
+	ArticleRequest {
+		Id int64 `path:"id"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	jwt:        Auth
+	middleware: UserExistMiddleware
+	group:      article
+)
+service nicofile-api {
+	@handler ArticleCreateHandler
+	post /article (ArticleCreateRequest) returns (ArticleResponse)
+
+	@handler ArticleUpdateHandler
+	put /article/:id (ArticleUpdateRequest) returns (ArticleResponse)
+
+	@handler ArticleDeleteHandler
+	delete /article/:id (ArticleDeleteRequest) returns (ArticleDeleteResponse)
+
+	@handler ArticleListHandler
+	get /article/list (ArticleListRequest) returns (ArticleListResponse)
+
+	@handler ArticleDetailHandler
+	get /article/:id (ArticleRequest) returns (ArticleResponse)
+}
+
