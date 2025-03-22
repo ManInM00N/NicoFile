@@ -1,0 +1,8 @@
+dataSourceKey: default
+destination: nicoSlave
+groupId: g1
+esMapping:
+  _index: chunk
+  _id: _id
+  sql: "SELECT id AS _id, created_at, updated_at  , file_name, file_path, chunk_index, md5, size, ext, author_id FROM chunks"
+  commitBatch: 3000

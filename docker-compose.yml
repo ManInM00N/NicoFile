@@ -69,18 +69,19 @@ services:
   # Prometheus 服务
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
+    container_name: nico-prometheus
     ports:
       - "29090:9090"  # Prometheus Web UI 端口
     volumes:
       - ./nicofile/etc/prometheus.yml:/etc/prometheus/prometheus.yml  # 挂载 Prometheus 配置文件
     networks:
       - monitoring-network
+    restart: always
 
   # Grafana 服务
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: nico-grafana
     restart: always
     ports:
       - "23000:3000"  # Grafana Web UI 端口
@@ -90,10 +91,88 @@ services:
       - monitoring-network
 
 
+
+  mysql:
+    image: mysql:8.4.4
+    container_name: nico-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nicofile
+      MYSQL_USER: canal
+      MYSQL_PASSWORD: canal
+    ports:
+      - "23306:3306"
+#    volumes:
+    restart: always
+
+    networks:
+      - canal-network
+
+  canal-server:
+    image: canal/canal-server:v1.1.8
+    container_name: nico-canal-server
+    environment:
+      canal.instance.master.address: mysql:3306
+      canal.instance.dbUsername: canal
+      canal.instance.dbPassword: canal
+      canal.instance.filter.regex: nicofile\\..*
+    depends_on:
+      - mysql
+    ports:
+      - "21111:11111"
+    volumes:
+      - ./canal-server/logs:/home/admin/canal-server/logs
+    networks:
+      - canal-network
+    restart: always
+
+  canal-adapter:
+    image: slpcat/canal-adapter:v1.1.5
+    container_name: nico-canal-adapter
+    environment:
+      canal.conf.mode: tcp
+      canal.conf.canalServerHost: canal-server:11111
+      canal.conf.srcDataSources.default.url: jdbc:mysql://mysql:3306/nicofile
+      canal.conf.srcDataSources.default.username: canal
+      canal.conf.srcDataSources.default.password: canal
+      canal.conf.destinations: nicoSlave
+    volumes:
+      - ./ES/application.yml:/opt/canal-adapter/conf/application.yml
+      - ./ES/es7:/opt/canal-adapter/conf/es7
+      - ./canal-adapter/logs:/opt/canal-adapter/logs
+    depends_on:
+      - canal-server
+      - elasticsearch
+    ports:
+      - "28081:8081"
+    networks:
+      - canal-network
+    restart: always
+
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    container_name: nico-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "29200:9200"
+      - "29300:9300"
+    volumes:
+      - ./ES/data:/usr/share/elasticsearch/data
+    networks:
+      - canal-network
+    restart: always
+
+
 networks:
   kafka-etcd-network:
     driver: bridge
   monitoring-network:
+    driver: bridge
+  canal-network:
     driver: bridge
 
 volumes:

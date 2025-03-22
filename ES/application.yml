@@ -1,0 +1,16 @@
+canal.conf:
+  mode: tcp
+  canalServerHost: canal-server:11111
+  srcDataSources:
+    default:
+      url: jdbc:mysql://mysql:3306/nicofile?useSSL=false&serverTimezone=UTC
+      username: canal
+      password: canal
+  canalAdapters:
+    groups:
+      nicoSlave:
+        outerAdapters:
+          - name: es7
+            hosts: elasticsearch:9200
+            properties:
+              cluster.name: "docker-cluster"

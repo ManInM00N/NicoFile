@@ -1,0 +1,9 @@
+dataSourceKey: default
+destination: nicoSlave
+groupId: g1
+esMapping:
+  _index: user
+  _type: _doc
+  _id: _id
+  sql: "SELECT id AS _id, created_at, updated_at , username , password , priority FROM users"
+  commitBatch: 3000

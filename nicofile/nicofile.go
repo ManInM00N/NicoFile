@@ -30,7 +30,7 @@ var inTest = flag.Lookup("test.v") != nil
 const basename = "/static"
 
 func main() {
-	util.NewLog("nicofile-log")
+	util.NewLog("nicofile/nicofile-log")
 	flag.Parse()
 	var c config.Config
 	conf.MustLoad(*configFile, &c)

@@ -6,6 +6,6 @@ scrape_configs:
   - job_name: 'go-zero-service'
     static_configs:
       - targets: ['localhost:29091']  # Go-Zero 服务的 Prometheus 指标地址
-    labels: [
-
-    ]
+#        labels: [
+#            instance: 'go-zero-service'
+#        ]
