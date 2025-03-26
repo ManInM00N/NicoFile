@@ -4,11 +4,14 @@
 package types
 
 type Article struct {
-	Id        int64  `json:"id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"createdat"`
-	View      int64  `json:"view"`
+	Id         int64  `json:"id"`
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"createdat"`
+	View       int64  `json:"view"`
+	Like       int64  `json:"like"`
+	AuthorId   int64  `json:"authorid"`
+	AuthorName string `json:"authorname"`
 }
 
 type ArticleCreateRequest struct {
@@ -25,9 +28,13 @@ type ArticleDeleteResponse struct {
 	Message string `json:"message"`
 }
 
+type ArticleLikeRequest struct {
+	Id int64 `json:"id"`
+}
+
 type ArticleListRequest struct {
-	Page int `json:"page"`
-	Size int `json:"size"`
+	Page int   `json:"page,range=[1:]"`
+	Size int64 `json:"size,optional"`
 }
 
 type ArticleListResponse struct {
@@ -44,12 +51,16 @@ type ArticleRequest struct {
 }
 
 type ArticleResponse struct {
-	Error     bool   `json:"error"`
-	Message   string `json:"message"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"createdat"`
-	View      string `json:"view"`
+	Error      bool   `json:"error"`
+	Message    string `json:"message"`
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"createdat"`
+	View       string `json:"view"`
+	Like       string `json:"like"`
+	ArticleId  string `json:"articleid"`
+	AuthorId   string `json:"authorid"`
+	AuthorName string `json:"authorname"`
 }
 
 type ArticleUpdateRequest struct {

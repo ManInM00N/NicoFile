@@ -42,17 +42,15 @@ func (l *UserRegisterLogic) UserRegister(req *types.RegisterRequest) (resp *type
 		resp.Message = "名称非法或已存在"
 		return
 	}
-	if !l.svcCtx.Config.Kafka.Disabled {
-		event := &kafka.UserMonitor{
-			Message: "A new user has been registered",
-			Warning: false,
-			UserId:  uint32(User.ID),
-		}
-		data, _ := proto.Marshal(event)
-		(*l.svcCtx.Producer).Input() <- &sarama.ProducerMessage{
-			Topic: "data-monitor-test", // l.svcCtx.Config.Kafka.Topic,
-			Value: sarama.ByteEncoder(data),
-		}
+	event := &kafka.UserMonitor{
+		Message: "A new user has been registered",
+		Warning: false,
+		UserId:  uint32(User.ID),
+	}
+	data, _ := proto.Marshal(event)
+	(*l.svcCtx.Producer).Input() <- &sarama.ProducerMessage{
+		Topic: "data-monitor-test", // l.svcCtx.Config.Kafka.Topic,
+		Value: sarama.ByteEncoder(data),
 	}
 	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
 	resp.Message = "注册成功"

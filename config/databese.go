@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm/logger"
 	"main/model"
+	"main/pkg/encrypt"
 	"main/pkg/util"
 	"time"
 
@@ -55,5 +56,7 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		util.Log.Fatalln("Table User failed Migrate")
 	}
+	pwd := encrypt.EncPassword("123456")
+	DB.Model(&model.User{}).Where("username = ?", "admin").FirstOrCreate(&model.User{Username: "admin", Password: pwd, Priority: 2})
 	return DB
 }

@@ -31,7 +31,7 @@ func (l *ArticleCreateLogic) ArticleCreate(req *types.ArticleCreateRequest) (res
 		Error:   false,
 		Message: "",
 	}
-	idv := l.ctx.Value("userId").(json.Number)
+	idv := l.ctx.Value("UserId").(json.Number)
 	id, _ := idv.Int64()
 	Art := model.Article{
 		Title:    req.Title,
@@ -44,7 +44,7 @@ func (l *ArticleCreateLogic) ArticleCreate(req *types.ArticleCreateRequest) (res
 		resp.Message = "创建失败error creating"
 		return
 	}
-	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", Art.ID), "title", Art.Title, "AuId", id, "content", Art.Content, "creat_at", Art.CreatedAt).Err()
-
+	resp.ArticleId = fmt.Sprintf("%d", Art.ID)
+	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", Art.ID), "title", Art.Title, "AuId", id, "content", Art.Content, "creat_at", Art.CreatedAt.Format("2006-01-02 15:04:05")).Err()
 	return
 }

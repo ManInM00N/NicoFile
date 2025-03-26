@@ -1,12 +1,9 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"fmt"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"main/model"
 	"main/nicofile/internal/middleware"
 	"main/pkg/util"
 	CacheRedis "main/redis"
@@ -58,31 +55,6 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	if !c.Redis.Disabled {
-		util.Log.Println("Transport redis cache...")
-		var list []model.File
-		offset := 0
-		ctxx := context.Background()
-		counts := 0
-		for {
-			if err := ctx.DB.
-				Model(&model.File{}).
-				Select("id,file_name,file_path,author_id,description,download_times").
-				Offset(offset).
-				Limit(10000).
-				Find(&list).Error; err != nil {
-				util.Log.Errorf("Failed to scan keys from SQLite: %v", err)
-				return
-			}
-			if len(list) == 0 {
-				break
-			}
-			counts += len(list)
-			for _, v := range list {
-				ctx.Rdb.HSet(ctxx, fmt.Sprintf("file:%d", v.ID), "download_times", v.DownloadTimes, "description", v.Description, "author_id", v.AuthorID, "file_path", v.FilePath)
-			}
-			offset += 10000
-		}
-		util.Log.Println("Transport redis cache done, total:", counts)
 		go func(rdb *redis.Client, DB *gorm.DB) {
 			timer := time.NewTimer(time.Duration(c.Redis.RefreshInterval) * time.Second)
 			for range timer.C {

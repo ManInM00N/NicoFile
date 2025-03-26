@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"main/model"
 	"main/pkg/encrypt"
 	"main/pkg/jwt"
@@ -35,6 +36,7 @@ func (l *UserLoginLogic) UserLogin(req *types.LoginRequest) (resp *types.AuthRes
 		}
 		return
 	}
+	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", User.ID), "username", User.Username, "priority", User.Priority, "password", User.Password)
 	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
 	resp = &types.AuthResponse{
 		Message:  "登录成功",

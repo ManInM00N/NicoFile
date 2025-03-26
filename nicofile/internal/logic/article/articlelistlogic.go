@@ -40,7 +40,6 @@ func (l *ArticleListLogic) ArticleList(req *types.ArticleListRequest) (resp *typ
 	offset := (req.Page - 1) * config2.PageSize
 	var list []model.Article
 	err2 := l.svcCtx.DB.Model(&model.Article{}).Preload("Author").
-		Select("id").
 		Offset(offset).
 		Limit(config2.PageSize).
 		Find(&list).Error
@@ -49,11 +48,14 @@ func (l *ArticleListLogic) ArticleList(req *types.ArticleListRequest) (resp *typ
 	}
 	for _, i := range list {
 		tmp := types.Article{
-			Id:        int64(i.ID),
-			CreatedAt: i.CreatedAt.Format("2006-01-02 15:04:05"),
-			Content:   i.Content,
-			Title:     i.Title,
-			View:      i.View,
+			Id:         int64(i.ID),
+			CreatedAt:  i.CreatedAt.Format("2006-01-02 15:04:05"),
+			Content:    i.Content,
+			Title:      i.Title,
+			View:       i.View,
+			Like:       i.Like,
+			AuthorId:   int64(i.AuthorID),
+			AuthorName: i.Author.Username,
 		}
 		if !l.svcCtx.Config.Redis.Disabled {
 			result, _ := l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(i.ID)), "view").Result()

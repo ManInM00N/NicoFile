@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package="./server/proto/articleRank";
+package articleRank;
+
+service ArticleRankService {
+    rpc GetArticleRank(GetArticleRankRequest) returns (GetArticleRankResponse);
+}
+
+message GetArticleRankRequest {
+    int64 articleNum = 1;
+}
+message Article{
+    uint32 articleId = 1;
+    string articleTitle = 2;
+}
+message GetArticleRankResponse {
+    bool success = 1;
+    repeated Article articleList = 2;
+}
+
+

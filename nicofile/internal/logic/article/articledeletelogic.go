@@ -42,7 +42,10 @@ func (l *ArticleDeleteLogic) ArticleDelete(req *types.ArticleDeleteRequest) (res
 		resp.Error = true
 		resp.Message = "删除失败"
 		return
+	} else {
+		l.svcCtx.Rdb.Del(context.Background(), fmt.Sprintf("article:%d", req.Id)).Err()
 	}
+
 	resp.Message = "删除成功"
 	return
 }

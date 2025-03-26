@@ -210,11 +210,14 @@ service nicofile-api {
 
 type (
 	Article {
-		Id        int64  `json:"id"`
-		Title     string `json:"title"`
-		Content   string `json:"content"`
-		CreatedAt string `json:"createdat"`
-		View      int64  `json:"view"`
+		Id         int64  `json:"id"`
+		Title      string `json:"title"`
+		Content    string `json:"content"`
+		CreatedAt  string `json:"createdat"`
+		View       int64  `json:"view"`
+		Like       int64  `json:"like"`
+		AuthorId   int64  `json:"authorid"`
+		AuthorName string `json:"authorname"`
 	}
 	ArticleCreateRequest {
 		Title   string `json:"title"`
@@ -228,16 +231,20 @@ type (
 		Message string `json:"message"`
 	}
 	ArticleResponse {
-		Error     bool   `json:"error"`
-		Message   string `json:"message"`
-		Title     string `json:"title"`
-		Content   string `json:"content"`
-		CreatedAt string `json:"createdat"`
-		View      string `json:"view"`
+		Error      bool   `json:"error"`
+		Message    string `json:"message"`
+		Title      string `json:"title"`
+		Content    string `json:"content"`
+		CreatedAt  string `json:"createdat"`
+		View       string `json:"view"`
+		Like       string `json:"like"`
+		ArticleId  string `json:"articleid"`
+		AuthorId   string `json:"authorid"`
+		AuthorName string `json:"authorname"`
 	}
 	ArticleListRequest {
-		Page int `json:"page"`
-		Size int `json:"size"`
+		Page int   `json:"page,range=[1:]"`
+		Size int64 `json:"size,optional"`
 	}
 	ArticleListResponse {
 		List     []Article `json:"list"`
@@ -254,6 +261,9 @@ type (
 	}
 	ArticleRequest {
 		Id int64 `path:"id"`
+	}
+	ArticleLikeRequest {
+		Id int64 `json:"id"`
 	}
 )
 
@@ -272,11 +282,20 @@ service nicofile-api {
 
 	@handler ArticleDeleteHandler
 	delete /article/:id (ArticleDeleteRequest) returns (ArticleDeleteResponse)
+}
 
+@server (
+	prefix: /api/v1
+	group:  article
+)
+service nicofile-api {
 	@handler ArticleListHandler
-	get /article/list (ArticleListRequest) returns (ArticleListResponse)
+	post /article/list (ArticleListRequest) returns (ArticleListResponse)
 
 	@handler ArticleDetailHandler
 	get /article/:id (ArticleRequest) returns (ArticleResponse)
+
+	@handler ArticleLikeHandler
+	post /article/like (ArticleLikeRequest) returns (Response)
 }
 

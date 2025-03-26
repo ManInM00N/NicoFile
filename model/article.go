@@ -9,4 +9,5 @@ type Article struct {
 	AuthorID uint   `gorm:"index"`
 	Author   User   `gorm:"foreignKey:AuthorID;References:ID"`
 	View     int64  `gorm:"default:0"`
+	Like     int64  `gorm:"default:0"`
 }

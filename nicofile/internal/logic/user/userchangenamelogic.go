@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"main/model"
 
 	"main/nicofile/internal/svc"
@@ -40,6 +41,8 @@ func (l *UserChangeNameLogic) UserChangeName(req *types.NewNameRequest) (resp *t
 		resp.Error = true
 		resp.Message = "用户名修改失败"
 		return
+	} else {
+		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", id), "username", req.NewName).Err()
 	}
 	return
 }

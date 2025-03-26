@@ -1,8 +1,9 @@
 dataSourceKey: default
+outerAdapterKey: default-es7
 destination: nicoSlave
 groupId: g1
 esMapping:
   _index: article
   _id: _id
-  sql: "SELECT id AS _id , created_at, updated_at , title, content, author_id, view FROM articles"
-  commitBatch: 3000
+  sql: "SELECT id AS _id , created_at, updated_at , title, content, author_id, view FROM nicofile.articles"
+  commitBatch: 1

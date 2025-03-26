@@ -1,16 +1,48 @@
+logging:
+  level:
+    com.alibaba.otter: DEBUG
+    org.springframework: DEBUG
+
 canal.conf:
   mode: tcp
   canalServerHost: canal-server:11111
+  syncBatchSize: 1000
+  timeout: 120000
+  flatMessage: true  # 添加此项确保消息格式统一
+
+  destinations: nicoSlave
+
+  consumerProperties:
+    max.poll.records: 1000
+    canal.tcp.server: canal-server:11111
+    max.poll.interval.ms: 300000
+    session.timeout.ms: 30000
+    canal.tcp.zookeeper.hosts:
+    canal.tcp.batch.size: 1000
+    heartbeat.interval.ms: 10000
+    auto.offset.reset: latest
+
   srcDataSources:
     default:
       url: jdbc:mysql://mysql:3306/nicofile?useSSL=false&serverTimezone=UTC
       username: canal
       password: canal
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      maxActive: 10  # 添加连接池配置
+      initialSize: 2
+      minIdle: 2
+
   canalAdapters:
     groups:
-      nicoSlave:
-        outerAdapters:
-          - name: es7
-            hosts: elasticsearch:9200
-            properties:
-              cluster.name: "docker-cluster"
+    -  groupId: g1
+       outerAdapters:
+        - name: logger
+        - name: es7
+          key: default-es7
+          hosts: elasticsearch:9200
+          properties:
+            mode: rest
+            cluster.name: "docker-cluster"
+            security.auth:
+            max.bulk.size: 20
+            bulk.timeout: 60000

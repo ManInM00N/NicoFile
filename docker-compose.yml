@@ -1,7 +1,7 @@
 services:
   nicofile-redis:
     image: redis:7.0.12
-    container_name: nicofile-redis
+    container_name: nico-redis
     ports:
       - "6380:6380"
     volumes:
@@ -16,7 +16,7 @@ services:
         max-file: "2"
   nicofile_kafka:
     image: bitnami/kafka:3.9.0
-    container_name: nicofile-kafka
+    container_name: nico-kafka
     hostname: kafka
     ports:
       - "9092:9092"
@@ -33,6 +33,8 @@ services:
     volumes:
       - ./kafka:/bitnami/kafka
     restart: always
+    networks:
+      - kafka-etcd-network
     logging:
       driver: "json-file"
       options:
@@ -40,7 +42,7 @@ services:
         max-file: "3"
   etcd:
     image: bitnami/etcd:3.5.18
-    container_name: nicofile-etcd
+    container_name: nico-etcd
     hostname: etcd
     user: root  # 以 root 用户运行容器
     ports:
@@ -93,7 +95,7 @@ services:
 
 
   mysql:
-    image: mysql:8.4.4
+    image: mysql:8.0.22
     container_name: nico-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -102,7 +104,8 @@ services:
       MYSQL_PASSWORD: canal
     ports:
       - "23306:3306"
-#    volumes:
+    volumes:
+      - ./mysql_data:/var/lib/mysql
     restart: always
 
     networks:
@@ -131,11 +134,11 @@ services:
     container_name: nico-canal-adapter
     environment:
       canal.conf.mode: tcp
-      canal.conf.canalServerHost: canal-server:11111
-      canal.conf.srcDataSources.default.url: jdbc:mysql://mysql:3306/nicofile
-      canal.conf.srcDataSources.default.username: canal
-      canal.conf.srcDataSources.default.password: canal
-      canal.conf.destinations: nicoSlave
+#      canal.conf.canalServerHost: canal-server:11111
+#      canal.conf.srcDataSources.default.url: jdbc:mysql://mysql:3306/nicofile
+#      canal.conf.srcDataSources.default.username: canal
+#      canal.conf.srcDataSources.default.password: canal
+#      canal.conf.destinations: nicoSlave
     volumes:
       - ./ES/application.yml:/opt/canal-adapter/conf/application.yml
       - ./ES/es7:/opt/canal-adapter/conf/es7
@@ -147,6 +150,7 @@ services:
       - "28081:8081"
     networks:
       - canal-network
+      - kafka-etcd-network
     restart: always
 
   elasticsearch:

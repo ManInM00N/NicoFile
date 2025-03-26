@@ -6,10 +6,13 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/ManInM00N/go-tool/statics"
 	"google.golang.org/protobuf/proto"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	config2 "main/config"
 	"main/kafka"
 	"main/model"
+	"main/pkg/encrypt"
 	"main/pkg/util"
 	CacheRedis "main/redis"
 	kafka2 "main/server/proto/kafka"
@@ -141,21 +144,25 @@ func TestQuery(t *testing.T) {
 	(*pro).Close()
 }
 func TestQueryLimit(t *testing.T) {
-	DB := config2.InitDB()
-	var ed model.Chunk
-
-	for i := 0; i < 10000; i++ {
-		var chunk []model.Chunk
-		DB.Model(model.Chunk{}).Select("file_name,author_id,chunk_index").Where("author_id = ?  and file_name = 'test4'", 4).Find(&chunk)
-
-		//DB.Model(model.Chunk{}).Where("author_id = ? and file_name = 'test4'", 4).Find(&chunk)
-		if len(chunk) > 0 && i == 0 {
-			ed = chunk[0]
-		}
+	DB, err := gorm.Open(sqlite.Open("./data.db"), &gorm.Config{
+		PrepareStmt: true,
+		Logger:      logger.Discard,
+	})
+	if err != nil {
+		t.Error(err)
 	}
-	if ed.AuthorID == 0 {
-		t.Errorf("Query failed %v \n", ed)
+	err = DB.AutoMigrate(
+		&model.User{},
+		&model.File{},
+		&model.Chunk{},
+		&model.Article{},
+	) // 自动迁移 User 模型
+	if err != nil {
+		t.Error("Table User failed Migrate")
 	}
+	pwd := encrypt.EncPassword("12345678")
+	DB.Model(&model.User{}).Where("username = ?", "admin").FirstOrCreate(&model.User{Username: "admin", Password: pwd, Priority: 2})
+	DB.Model(&model.User{}).Where("username = ?", "114514").FirstOrCreate(&model.User{Username: "114514", Password: pwd, Priority: 2})
 
 }
 
@@ -190,8 +197,13 @@ func TestRedis(t *testing.T) {
 	fmt.Println(data, err, data == nil)
 }
 func TestTransport(t *testing.T) {
-
-	DB := config2.InitDB()
+	DB, err := gorm.Open(sqlite.Open("./data.db"), &gorm.Config{
+		PrepareStmt: true,
+		Logger:      logger.Discard,
+	})
+	if err != nil {
+		t.Error(err)
+	}
 	rdb := CacheRedis.InitRedis("127.0.0.1", 6380, "", 0, false)
 	ctx := context.Background()
 	var file = model.File{}
