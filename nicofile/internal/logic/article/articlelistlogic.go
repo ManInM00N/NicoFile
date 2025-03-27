@@ -56,12 +56,14 @@ func (l *ArticleListLogic) ArticleList(req *types.ArticleListRequest) (resp *typ
 			Like:       i.Like,
 			AuthorId:   int64(i.AuthorID),
 			AuthorName: i.Author.Username,
+			Cover:      i.Cover,
 		}
-		if !l.svcCtx.Config.Redis.Disabled {
-			result, _ := l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(i.ID)), "view").Result()
-			v, _ := strconv.Atoi(result)
-			tmp.View = int64(v)
-		}
+		result, _ := l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(i.ID)), "view").Result()
+		v, _ := strconv.Atoi(result)
+		tmp.View = int64(v)
+		result, _ = l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(i.ID)), "like").Result()
+		v, _ = strconv.Atoi(result)
+		tmp.Like = int64(v)
 		resp.List = append(resp.List, tmp)
 	}
 	resp.Num = len(resp.List)

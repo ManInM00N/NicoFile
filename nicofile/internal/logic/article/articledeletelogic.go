@@ -44,6 +44,8 @@ func (l *ArticleDeleteLogic) ArticleDelete(req *types.ArticleDeleteRequest) (res
 		return
 	} else {
 		l.svcCtx.Rdb.Del(context.Background(), fmt.Sprintf("article:%d", req.Id)).Err()
+		l.svcCtx.Rdb.ZRem(context.Background(), "article:hotness:leaderboard", req.Id).Err()
+		l.svcCtx.Rdb.ZRem(context.Background(), "article:hotness:current_window", req.Id).Err()
 	}
 
 	resp.Message = "删除成功"

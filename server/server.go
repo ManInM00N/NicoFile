@@ -20,7 +20,7 @@ func main() {
 	CacheRedis.InitRedis("127.0.0.1:", 6380, "", 0, false)
 	util.Log.Tracef("DB init successfully %d %d", 2, 4)
 	// 启动 gRPC 服务
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", "127.0.0.1:50051")
 	if err != nil {
 		util.Log.Errorf("failed to listen: %v\n", err)
 		panic(err)
@@ -31,8 +31,8 @@ func main() {
 	auth.RegisterAuthServiceServer(grpcServer, &handler.AuthServiceServer{})
 	articleRank.RegisterArticleRankServiceServer(grpcServer, articleRankServer)
 
-	util.Log.Traceln("gRPC server is running on port :50051")
-	fmt.Println("gRPC server is running on port :50051")
+	util.Log.Traceln("gRPC server is running on port 127.0.0.1:50051")
+	fmt.Println("gRPC server is running on port 127.0.0.1:50051")
 	if err := grpcServer.Serve(lis); err != nil {
 		util.Log.Errorf("failed to serve: %v\n", err)
 	}

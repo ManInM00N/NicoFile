@@ -1,6 +1,9 @@
 package config
 
-import "github.com/zeromicro/go-zero/rest"
+import (
+	"github.com/zeromicro/go-zero/rest"
+	"time"
+)
 
 type Config struct {
 	rest.RestConf
@@ -25,5 +28,21 @@ type Config struct {
 		Topic    string
 		Broker   string
 		Disabled bool
+	}
+	IMG struct {
+		PicPath      string
+		AllowedTypes []string
+	}
+	GrpcPool struct {
+		Size        int
+		MaxIdle     int
+		IdleTimeout time.Duration
+		MaxLifeTime time.Duration
+	}
+	Services struct {
+		ArticleRank struct {
+			Host string
+			Port int
+		}
 	}
 }

@@ -9,6 +9,7 @@ import (
 
 	article "main/nicofile/internal/handler/article"
 	file "main/nicofile/internal/handler/file"
+	image "main/nicofile/internal/handler/image"
 	user "main/nicofile/internal/handler/user"
 	"main/nicofile/internal/svc"
 
@@ -68,6 +69,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/article/list",
 				Handler: article.ArticleListHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/article/rank",
+				Handler: article.ArticleRankHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/api/v1"),
 	)
@@ -114,6 +120,29 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/img/upload",
+				Handler: image.UploadIMGHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/img/download/:id",
+				Handler: image.DownloadIMGHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/api/v1"),
 	)
 

@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"github.com/IBM/sarama"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 	"log"
 	config2 "main/config"
 	"main/model"
 	"main/pkg/util"
-	"main/server/proto/auth"
+	"main/server/proto/articleRank"
 	"main/server/proto/kafka"
 	"time"
 )
@@ -76,10 +77,10 @@ func (h *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 	return nil
 }
 
-func _() {
+func f_() {
 
 	log.Println("log init")
-	conn, err := grpc.NewClient(":50051", grpc.WithInsecure())
+	conn, err := grpc.NewClient("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("did not connect: %v\n", err)
 		panic(err)
@@ -88,22 +89,19 @@ func _() {
 	}
 	defer conn.Close()
 
-	client := auth.NewAuthServiceClient(conn)
-
-	// 尝试登录
-	res, err := client.Login(context.Background(), &auth.LoginRequest{
-		Username: "user1",
-		Password: "password123",
+	client := articleRank.NewArticleRankServiceClient(conn)
+	rank, err := client.GetArticleRank(context.Background(), &articleRank.GetArticleRankRequest{
+		ArticleNum: 7,
 	})
 	if err != nil {
-		util.Log.Printf("could not login: %v", err)
-		panic(err)
+		return
 	}
-
-	fmt.Printf("Login Response: %v\n", res.Message)
+	fmt.Println("client", rank)
 }
 
 func main() {
+	f_()
+	return
 	util.NewLog("monitor-log")
 	util.Log.Println("monitor started")
 	DB := config2.InitDB()

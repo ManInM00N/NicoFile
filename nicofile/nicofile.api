@@ -1,5 +1,9 @@
 syntax = "v1"
 
+type (
+	Null  {}
+)
+
 type Auth {
 	AccessToken  string `json:"access_token"`
 	AccessExpire int64  `json:"access_expire"`
@@ -218,6 +222,7 @@ type (
 		Like       int64  `json:"like"`
 		AuthorId   int64  `json:"authorid"`
 		AuthorName string `json:"authorname"`
+		Cover      string `json:"cover"`
 	}
 	ArticleCreateRequest {
 		Title   string `json:"title"`
@@ -297,5 +302,39 @@ service nicofile-api {
 
 	@handler ArticleLikeHandler
 	post /article/like (ArticleLikeRequest) returns (Response)
+
+	@handler ArticleRankHandler
+	get /article/rank (Null) returns (ArticleListResponse)
+}
+
+type UploadIMGRequest {}
+
+type UploadIMGResponse {
+	URL string `json:"url"` // 图片访问URL
+}
+
+type DownloadIMGRequest {
+	ID string `path:"id"` // 图片ID
+}
+
+type DownloadIMGResponse {}
+
+@server (
+	prefix: /api/v1
+	group:  image
+	jwt:    Auth
+)
+service nicofile-api {
+	@handler UploadIMGHandler
+	post /img/upload (UploadIMGRequest) returns (UploadIMGResponse)
+}
+
+@server (
+	prefix: /api/v1
+	group:  image
+)
+service nicofile-api {
+	@handler DownloadIMGHandler
+	get /img/download/:id (DownloadIMGRequest) returns (DownloadIMGResponse)
 }
 

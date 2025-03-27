@@ -182,10 +182,10 @@ func (s *ArticleRankServiceServer) GetArticleRank(ctx context.Context, req *arti
 	// 2. 从MySQL查询文章详情
 	var articles []*model.Article
 	db := config2.GetDB()
-	if err := db.Where("id IN ?", articleIDs).Find(&articles).Error; err != nil {
-		return nil, err
+	if err2 := db.Where("id IN ?", articleIDs).Find(&articles).Error; err2 != nil {
+		return nil, err2
 	}
-
+	fmt.Println(articles)
 	// 3. 按照热度排序
 	idToArticle := make(map[string]*model.Article)
 	for _, article := range articles {

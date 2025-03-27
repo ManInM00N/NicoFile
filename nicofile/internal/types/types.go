@@ -12,6 +12,7 @@ type Article struct {
 	Like       int64  `json:"like"`
 	AuthorId   int64  `json:"authorid"`
 	AuthorName string `json:"authorname"`
+	Cover      string `json:"cover"`
 }
 
 type ArticleCreateRequest struct {
@@ -108,6 +109,13 @@ type DeleteUserRequest struct {
 type DeleteUserResponse struct {
 	Error   bool   `json:"error"`
 	Message string `json:"message"`
+}
+
+type DownloadIMGRequest struct {
+	ID string `path:"id"` // 图片ID
+}
+
+type DownloadIMGResponse struct {
 }
 
 type File struct {
@@ -211,6 +219,9 @@ type NewPasswordResponse struct {
 	Message string `json:"message"`
 }
 
+type Null struct {
+}
+
 type RegisterRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -234,4 +245,11 @@ type UploadChunkRequest struct {
 type UploadChunkResponse struct {
 	Error   bool   `json:"error,options=true|false"`
 	Message string `json:"message,optional"`
+}
+
+type UploadIMGRequest struct {
+}
+
+type UploadIMGResponse struct {
+	URL string `json:"url"` // 图片访问URL
 }

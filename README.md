@@ -17,11 +17,14 @@
   - [ ] git同步功能 :tada:
   - [x] 优化预览缓存机制 :wave:
 - [x] 文章基础功能 :monocle_face:
+  - [x] 热点文章排行榜 :monocle_face:
+  - [x] 图库 
 - [ ] 引入ES
 - [ ] Redis 集群化
 - [x] kafka集成prometheus监控 :alien:
 - [x] 引入etcd管理微服务 :zap:
   - [x] 迁移用户微服务
+  - [x] 迁移排行榜 
 - [ ] 引入gpt-3.5 接口 
 
 前端部分请移步：[NicoFile_Web](https://github.com/Dip-a-scent-of-Blossom/NicoFile_Web)
@@ -31,4 +34,10 @@ To QuickStart ：
 ```shell
 docker-compose up -d
 go run nicofile/nicofile.go
+go run server/server.go 
+```
+To generate api:
+```shell
+goctl api go --api=./nicofile/nicofile.api --dir=./nicofile 
+protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. server/proto/*/*.proto
 ```
