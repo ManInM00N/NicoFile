@@ -26,3 +26,9 @@ go.work.sum
 /storage/
 /chunkstore/
 /kafka/data/
+/etcd/
+/ES/data/
+/grafana-data/
+/canal-adapter/logs/
+/canal-server/logs/
+/mysql_data/
