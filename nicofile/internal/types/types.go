@@ -18,6 +18,7 @@ type Article struct {
 type ArticleCreateRequest struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
+	Cover   string `json:"cover"`
 }
 
 type ArticleDeleteRequest struct {

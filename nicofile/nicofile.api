@@ -227,6 +227,7 @@ type (
 	ArticleCreateRequest {
 		Title   string `json:"title"`
 		Content string `json:"content"`
+		Cover   string `json:"cover"`
 	}
 	ArticleDeleteRequest {
 		Id int64 `path:"id"`

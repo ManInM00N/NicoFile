@@ -37,6 +37,7 @@ func (l *ArticleCreateLogic) ArticleCreate(req *types.ArticleCreateRequest) (res
 		Title:    req.Title,
 		Content:  req.Content,
 		AuthorID: uint(id),
+		Cover:    req.Cover,
 	}
 	err2 := l.svcCtx.DB.Create(&Art).Error
 	if err2 != nil {
