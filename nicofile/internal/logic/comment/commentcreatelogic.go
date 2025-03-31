@@ -41,9 +41,12 @@ func (l *CommentCreateLogic) CommentCreate(req *types.CommentCreateRequest) (res
 		ArticleID: uint(req.ArticleId),
 		AuthorId:  uint(id),
 		Status:    "pending",
-		ParentID:  0,
+		ParentID:  nil,
 	}
-	data.ParentID = uint(*req.ParentId)
+	if req.ParentId != 0 {
+		data.ParentID = new(uint)
+		*data.ParentID = uint(req.ParentId)
+	}
 	if err2 := l.svcCtx.DB.Model(&model.Comment{}).Create(&data).Error; err2 != nil {
 		fmt.Println(err2, id, req.ArticleId)
 		return nil, errors.New("创建失败error creating")

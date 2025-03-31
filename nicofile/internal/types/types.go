@@ -117,7 +117,7 @@ type Comment struct {
 
 type CommentCreateRequest struct {
 	ArticleId int64  `json:"articleid"`
-	ParentId  *int64 `json:"parentid,optional"`
+	ParentId  int64  `json:"parentid,optional"`
 	Content   string `json:"content"`
 }
 
