@@ -103,6 +103,47 @@ type CheckResponse struct {
 	Username string `json:"username"`
 }
 
+type Comment struct {
+	Id        int64     `json:"id"`
+	IP        string    `json:"ip"`
+	ArticleId int64     `json:"articleid"`
+	Content   string    `json:"content"`
+	CreatedAt string    `json:"createdat"`
+	AuthorId  int64     `json:"authorid"`
+	Author    string    `json:"author"`
+	ParentId  int64     `json:"parentid"`
+	Comments  []Comment `json:"comments"`
+}
+
+type CommentCreateRequest struct {
+	ArticleId int64  `json:"articleid"`
+	ParentId  *int64 `json:"parentid,optional"`
+	Content   string `json:"content"`
+}
+
+type CommentListRequest struct {
+	ArticleId int64 `form:"articleid"`
+	Page      int   `json:"page,range=[1:],optional"`
+	Size      int64 `json:"size,optional"`
+}
+
+type CommentListResponse struct {
+	List     []Comment `json:"list"`
+	Num      int       `json:"num"`
+	Error    bool      `json:"error"`
+	Message  string    `json:"message"`
+	AllPages int       `json:"allpages"`
+	Page     int       `json:"page"`
+}
+
+type CommentResponse struct {
+	Error    bool   `json:"error"`
+	Message  string `json:"message"`
+	Comment  string `json:"comment"`
+	AuthorId string `json:"authorid"`
+	Author   string `json:"author"`
+}
+
 type DeleteUserRequest struct {
 	Userid int64 `form:"userid"`
 }

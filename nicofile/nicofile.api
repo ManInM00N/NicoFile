@@ -96,6 +96,9 @@ service nicofile-api {
 
 	@handler DeleteUserHandler
 	delete /user/delete (DeleteUserRequest) returns (DeleteUserResponse)
+
+	@handler UploadCoverHandler
+	post /user/upload (UploadIMGRequest) returns (UploadIMGResponse)
 }
 
 type (
@@ -187,6 +190,7 @@ type (
 	prefix:     /api/v1
 	jwt:        Auth
 	middleware: UserExistMiddleware
+	timeout:    15s
 	group:      file
 )
 service nicofile-api {
@@ -337,5 +341,69 @@ service nicofile-api {
 service nicofile-api {
 	@handler DownloadIMGHandler
 	get /img/download/:id (DownloadIMGRequest) returns (DownloadIMGResponse)
+
+	@handler IMGCoverHandler
+	get /img/cover/:id (DownloadIMGRequest) returns (DownloadIMGResponse)
+}
+
+type (
+	Comment {
+		Id        int64     `json:"id"`
+		IP        string    `json:"ip"`
+		ArticleId int64     `json:"articleid"`
+		Content   string    `json:"content"`
+		CreatedAt string    `json:"createdat"`
+		AuthorId  int64     `json:"authorid"`
+		Author    string    `json:"author"`
+		ParentId  int64     `json:"parentid"`
+		Comments  []Comment `json:"comments"`
+	}
+	CommentCreateRequest {
+		ArticleId int64  `json:"articleid"`
+		ParentId  *int64 `json:"parentid,optional"`
+		Content   string `json:"content"`
+	}
+	CommentResponse {
+		Error    bool   `json:"error"`
+		Message  string `json:"message"`
+		Comment  string `json:"comment"`
+		AuthorId string `json:"authorid"`
+		Author   string `json:"author"`
+	}
+	CommentListRequest {
+		ArticleId int64 `form:"articleid"`
+		Page      int   `json:"page,range=[1:],optional"`
+		Size      int64 `json:"size,optional"`
+	}
+	CommentListResponse {
+		List     []Comment `json:"list"`
+		Num      int       `json:"num"`
+		Error    bool      `json:"error"`
+		Message  string    `json:"message"`
+		AllPages int       `json:"allpages"`
+		Page     int       `json:"page"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group:  comment
+	jwt:    Auth
+)
+service nicofile-api {
+	@handler CommentCreateHandler
+	post /comment (CommentCreateRequest) returns (CommentResponse)
+
+	@handler CommentDeleteHandler
+	delete /comment/:id (DownloadIMGRequest) returns (Response)
+}
+
+@server (
+	prefix: /api/v1
+	group:  comment
+)
+service nicofile-api {
+	@handler CommentListHandler
+	get /comment/list (CommentListRequest) returns (CommentListResponse)
 }
 

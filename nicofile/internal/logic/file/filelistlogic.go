@@ -42,10 +42,10 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 	var list []model.File
 	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
 	err2 := l.svcCtx.DB.Model(&model.File{}).Preload("Author", func(db *gorm.DB) *gorm.DB {
-		return db.Select("id, username").Where("id = ?", id)
+		return db.Select("id, username").Where("id = ? or ?", id, true)
 	}).
 		Select("id,file_name,file_path,size,author_id,md5,ext,description,download_times,created_at").
-		Where("author_id = ? or ?", id, id == 6).
+		Where("author_id = ? or ?", id, true).
 		Offset(offset).
 		Limit(config2.PageSize).
 		Find(&list).Error

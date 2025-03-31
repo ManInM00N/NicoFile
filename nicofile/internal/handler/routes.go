@@ -8,6 +8,7 @@ import (
 	"time"
 
 	article "main/nicofile/internal/handler/article"
+	comment "main/nicofile/internal/handler/comment"
 	file "main/nicofile/internal/handler/file"
 	image "main/nicofile/internal/handler/image"
 	user "main/nicofile/internal/handler/user"
@@ -79,6 +80,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/comment",
+				Handler: comment.CommentCreateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/comment/:id",
+				Handler: comment.CommentDeleteHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/comment/list",
+				Handler: comment.CommentListHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.UserExistMiddleware},
 			[]rest.Route{
@@ -121,6 +150,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
+		rest.WithTimeout(15000*time.Millisecond),
 	)
 
 	server.AddRoutes(
@@ -137,6 +167,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/img/cover/:id",
+				Handler: image.IMGCoverHandler(serverCtx),
+			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/img/download/:id",
@@ -186,6 +221,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/user/newpassword",
 					Handler: user.UserChangePasswordHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/user/upload",
+					Handler: user.UploadCoverHandler(serverCtx),
 				},
 			}...,
 		),
