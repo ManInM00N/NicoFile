@@ -122,16 +122,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: file.FileDeleteHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodGet,
-					Path:    "/file/download",
-					Handler: file.FileDownloadHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/file/list",
-					Handler: file.FileListHandler(serverCtx),
-				},
-				{
 					Method:  http.MethodPost,
 					Path:    "/file/mergechunk",
 					Handler: file.MergeChunkHandler(serverCtx),
@@ -149,6 +139,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+		rest.WithTimeout(15000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/file/download",
+				Handler: file.FileDownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/file/list",
+				Handler: file.FileListHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/api/v1"),
 		rest.WithTimeout(15000*time.Millisecond),
 	)

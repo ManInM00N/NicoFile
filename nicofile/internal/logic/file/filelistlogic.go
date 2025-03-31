@@ -2,7 +2,6 @@ package file
 
 import (
 	"context"
-	"encoding/json"
 	"gorm.io/gorm"
 	config2 "main/config"
 	"main/model"
@@ -40,12 +39,12 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 	req.Page = min(req.Page, pages)
 	offset := (req.Page - 1) * config2.PageSize
 	var list []model.File
-	id, _ := l.ctx.Value("UserId").(json.Number).Int64()
+	//id, _ := l.ctx.Value("UserId").(json.Number).Int64()
 	err2 := l.svcCtx.DB.Model(&model.File{}).Preload("Author", func(db *gorm.DB) *gorm.DB {
-		return db.Select("id, username").Where("id = ? or ?", id, true)
+		return db.Select("id, username").Where(" ?", true)
 	}).
 		Select("id,file_name,file_path,size,author_id,md5,ext,description,download_times,created_at").
-		Where("author_id = ? or ?", id, true).
+		Where("  ?", true).
 		Offset(offset).
 		Limit(config2.PageSize).
 		Find(&list).Error

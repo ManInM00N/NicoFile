@@ -197,14 +197,8 @@ service nicofile-api {
 	@handler FileUploadHandler
 	post /file/upload (FileUploadRequest) returns (FileUploadResponse)
 
-	@handler FileDownloadHandler
-	get /file/download (FileDownloadRequest) returns (FileDownloadResponse)
-
 	@handler FileDeleteHandler
 	delete /file/delete (FileDeleteRequest) returns (FileDeleteResponse)
-
-	@handler FileListHandler
-	post /file/list (FileListRequest) returns (FileListResponse)
 
 	@handler UploadChunkHandler
 	post /file/uploadchunk (UploadChunkRequest) returns (UploadChunkResponse)
@@ -214,6 +208,19 @@ service nicofile-api {
 
 	@handler CheckChunkHandler
 	post /file/checkchunk (CheckChunkRequest) returns (CheckChunkResponse)
+}
+
+@server (
+	prefix:  /api/v1
+	timeout: 15s
+	group:   file
+)
+service nicofile-api {
+	@handler FileDownloadHandler
+	get /file/download (FileDownloadRequest) returns (FileDownloadResponse)
+
+	@handler FileListHandler
+	post /file/list (FileListRequest) returns (FileListResponse)
 }
 
 type (
