@@ -16,7 +16,7 @@ func main() {
 	prefix := "server"
 	util.NewLog(prefix)
 	// 初始化数据库
-	config.InitDB()
+	config.InitDB("127.0.0.1")
 	CacheRedis.InitRedis("127.0.0.1:", 6380, "", 0, false)
 	util.Log.Tracef("DB init successfully %d %d", 2, 4)
 	// 启动 gRPC 服务
