@@ -27,7 +27,7 @@ IMG:
 #    - image/gif
 
 Etcd:
-  Host: "http://127.0.0.1:"
+  Host: "127.0.0.1:"
   Port: "2379"
 
 Redis:
