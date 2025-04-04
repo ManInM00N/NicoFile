@@ -40,6 +40,7 @@ func (l *ArticleListLogic) ArticleList(req *types.ArticleListRequest) (resp *typ
 	offset := (req.Page - 1) * config2.PageSize
 	var list []model.Article
 	err2 := l.svcCtx.DB.Model(&model.Article{}).Preload("Author").
+		Order("created_at desc").
 		Offset(offset).
 		Limit(config2.PageSize).
 		Find(&list).Error

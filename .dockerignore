@@ -1,0 +1,9 @@
+chunkstore
+canal-adapter
+canal-server
+ES
+grafana-data
+kafka/data
+mysql_data
+redis/data
+storage

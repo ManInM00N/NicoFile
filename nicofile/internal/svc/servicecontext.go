@@ -30,7 +30,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	return &ServiceContext{
 		Config:              c,
-		DB:                  config2.InitDB(),
+		DB:                  config2.InitDB(c.Sql.Host),
 		Rdb:                 CacheRedis.InitRedis(c.Redis.Host, c.Redis.Port, c.Redis.Password, c.Redis.DB, c.Redis.Disabled),
 		Producer:            kafka.Subscribe(c.Kafka.Disabled, c.Kafka.Host, c.Kafka.Port),
 		UserExistMiddleware: middleware.NewUserExistMiddleware().Handle,

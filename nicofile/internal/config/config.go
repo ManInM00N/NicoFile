@@ -24,7 +24,7 @@ type Config struct {
 	}
 	Kafka struct {
 		Host     string
-		Port     int
+		Port     string
 		Topic    string
 		Broker   string
 		Disabled bool
@@ -44,5 +44,12 @@ type Config struct {
 			Host string
 			Port int
 		}
+	}
+	Sql struct {
+		Host string
+	}
+	Etcd struct {
+		Host string
+		Port string
 	}
 }

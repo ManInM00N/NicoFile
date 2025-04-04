@@ -44,6 +44,7 @@ func (l *FileListLogic) FileList(req *types.FileListRequest) (resp *types.FileLi
 		return db.Select("id, username").Where(" ?", true)
 	}).
 		Select("id,file_name,file_path,size,author_id,md5,ext,description,download_times,created_at").
+		Order("created_at desc").
 		Where("  ?", true).
 		Offset(offset).
 		Limit(config2.PageSize).

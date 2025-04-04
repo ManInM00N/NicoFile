@@ -26,7 +26,7 @@ var (
 func GetDB() *gorm.DB {
 	return DB
 }
-func InitDB() *gorm.DB {
+func InitDB(host string) *gorm.DB {
 	var err error
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local&timeout=%s", username, password, host, port, Dbname, timeout)
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
