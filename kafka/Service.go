@@ -28,7 +28,7 @@ func Subscribe(disabled bool, host string, port string) *sarama.AsyncProducer {
 		return nil
 	}
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{host + port}, // Etcd 地址
+		Endpoints:   []string{"localhost:2379"}, // Etcd 地址
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
