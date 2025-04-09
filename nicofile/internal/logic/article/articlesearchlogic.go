@@ -92,7 +92,7 @@ func (l *ArticleSearchLogic) ArticleSearch(req *types.ArticleSearchRequest) (res
 			AuthorName: l.svcCtx.Rdb.HGet(context.Background(), "user:"+strconv.Itoa(int(hit.Source.AuthorID)), "username").Val(),
 			View:       statics.StringToInt64(l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(hit.Source.ID)), "view").Val()),
 			Like:       statics.StringToInt64(l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(hit.Source.ID)), "like").Val()),
-			CreatedAt:  hit.Source.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:  l.svcCtx.Rdb.HGet(context.Background(), "article:"+strconv.Itoa(int(hit.Source.ID)), "creat_at").Val(),
 		})
 	}
 	return

@@ -64,10 +64,12 @@ elastic = "cover"
 mysql = "created_at"
 elastic = "created_at"
 type = "string"  # 存储为字符串
+
 [[rule.field]]
 mysql = "updated_at"
 elastic = "updated_at"
 type = "string"  # 存储为字符串
+
 # 关联作者信息（需要确保用户表已同步）
 [[rule.field]]
 mysql = "author_id"
