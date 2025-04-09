@@ -46,6 +46,6 @@ func (l *ArticleCreateLogic) ArticleCreate(req *types.ArticleCreateRequest) (res
 		return
 	}
 	resp.ArticleId = fmt.Sprintf("%d", Art.ID)
-	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", Art.ID), "title", Art.Title, "AuId", id, "content", Art.Content, "creat_at", Art.CreatedAt.Format("2006-01-02 15:04:05")).Err()
+	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", Art.ID), "title", Art.Title, "AuId", id, "content", Art.Content, "creat_at", Art.CreatedAt.Format("2006-01-02 15:04:05"), "cover", Art.Cover).Err()
 	return
 }
