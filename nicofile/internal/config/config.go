@@ -52,4 +52,8 @@ type Config struct {
 		Host string
 		Port string
 	}
+	Elasticsearch struct {
+		Host string
+		Port int
+	}
 }

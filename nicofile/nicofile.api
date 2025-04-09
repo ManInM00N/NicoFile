@@ -253,6 +253,7 @@ type (
 		Title      string `json:"title"`
 		Content    string `json:"content"`
 		CreatedAt  string `json:"createdat"`
+		Cover      string `json:"cover"`
 		View       string `json:"view"`
 		Like       string `json:"like"`
 		ArticleId  string `json:"articleid"`
@@ -281,6 +282,11 @@ type (
 	}
 	ArticleLikeRequest {
 		Id int64 `json:"id"`
+	}
+	ArticleSearchRequest {
+		Keyword string `json:"keyword"`
+		Page    int    `json:"page,range=[1:]"`
+		Size    int64  `json:"size,optional"`
 	}
 )
 
@@ -317,6 +323,9 @@ service nicofile-api {
 
 	@handler ArticleRankHandler
 	get /article/rank (Null) returns (ArticleListResponse)
+
+	@handler ArticleSearchHandler
+	post /article/search (ArticleSearchRequest) returns (ArticleListResponse)
 }
 
 type UploadIMGRequest {}

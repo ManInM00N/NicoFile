@@ -95,13 +95,15 @@ services:
 
 
   mysql:
-    image: mysql:8.0.22
+    image: mysql:5.7
     container_name: nico-mysql
+    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW --binlog-row-image=FULL --bind-address=0.0.0.0 --skip-name-resolve
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: nicofile
-      MYSQL_USER: canal
-      MYSQL_PASSWORD: canal
+      MYSQL_USER: slave
+      MYSQL_PASSWORD: slave
     ports:
       - "23306:3306"
     volumes:
@@ -111,47 +113,24 @@ services:
     networks:
       - canal-network
 
-  canal-server:
-    image: canal/canal-server:v1.1.8
-    container_name: nico-canal-server
+  mysql2:
+    image: mysql:8.0.22
+    container_name: nico-mysql2
+    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW --binlog-row-image=FULL --bind-address=0.0.0.0 --skip-name-resolve
     environment:
-      canal.instance.master.address: mysql:3306
-      canal.instance.dbUsername: canal
-      canal.instance.dbPassword: canal
-      canal.instance.filter.regex: nicofile\\..*
-    depends_on:
-      - mysql
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: nicofile
+      MYSQL_USER: slave
+      MYSQL_PASSWORD: slave
     ports:
-      - "21111:11111"
+      - "23307:3306"
     volumes:
-      - ./canal-server/logs:/home/admin/canal-server/logs
-    networks:
-      - canal-network
+      - ./mysql_data1:/var/lib/mysql
     restart: always
 
-  canal-adapter:
-    image: slpcat/canal-adapter:v1.1.5
-    container_name: nico-canal-adapter
-    environment:
-      canal.conf.mode: tcp
-#      canal.conf.canalServerHost: canal-server:11111
-#      canal.conf.srcDataSources.default.url: jdbc:mysql://mysql:3306/nicofile
-#      canal.conf.srcDataSources.default.username: canal
-#      canal.conf.srcDataSources.default.password: canal
-#      canal.conf.destinations: nicoSlave
-    volumes:
-      - ./ES/application.yml:/opt/canal-adapter/conf/application.yml
-      - ./ES/es7:/opt/canal-adapter/conf/es7
-      - ./canal-adapter/logs:/opt/canal-adapter/logs
-    depends_on:
-      - canal-server
-      - elasticsearch
-    ports:
-      - "28081:8081"
     networks:
       - canal-network
-      - kafka-etcd-network
-    restart: always
 
   elasticsearch:
     image: elasticsearch:7.17.0
@@ -169,6 +148,19 @@ services:
     networks:
       - canal-network
     restart: always
+
+  go-mysql-elasticsearch:
+    image: gozer/go-mysql-elasticsearch:latest
+    container_name: nico-go-mysql-elasticsearch
+    depends_on:
+      - mysql
+      - elasticsearch
+    volumes:
+      - ./transfer/etc/river.toml:/config/river.toml
+    restart: unless-stopped
+    networks:
+      - canal-network
+
   kibana:
     image: kibana:7.17.0
     container_name: elk_kibana
@@ -178,16 +170,17 @@ services:
     ports:
       - 5601:5601
     privileged: true    #环境变量
-  nico:
-    build: .  # 使用当前目录的 Dockerfile 构建
-    container_name: nicofile  # 自定义容器名（可选）
-    restart: unless-stopped  # 自动重启（可选）
-    extra_hosts:
-      - "host.docker.internal:host-gateway"  # 让容器能访问宿主机
-    volumes:
-      - ./nicofile/etc/nicofile-api.yaml:/app/nicofile/etc/nicofile-api.yaml
-    ports:  # 如果需要暴露端口
-       - "8888:8888"
+
+#  nico:
+#    build: .  # 使用当前目录的 Dockerfile 构建
+#    container_name: nicofile  # 自定义容器名（可选）
+#    restart: unless-stopped  # 自动重启（可选）
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"  # 让容器能访问宿主机
+#    volumes:
+#      - ./nicofile/etc/nicofile-api.yaml:/app/nicofile/etc/nicofile-api.yaml
+#    ports:  # 如果需要暴露端口
+#       - "8888:8888"
 
 
 networks:

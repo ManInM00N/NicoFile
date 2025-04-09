@@ -32,6 +32,7 @@ func (l *ArticleDetailLogic) ArticleDetail(req *types.ArticleRequest) (resp *typ
 	res, _ := l.svcCtx.Rdb.HGetAll(context.Background(), fmt.Sprintf("article:%d", req.Id)).Result()
 
 	if res["AuId"] != "" {
+		resp.Cover = res["cover"]
 		resp.Content = res["content"]
 		resp.Title = res["title"]
 		resp.CreatedAt = res["creat_at"]
@@ -44,6 +45,7 @@ func (l *ArticleDetailLogic) ArticleDetail(req *types.ArticleRequest) (resp *typ
 		l.svcCtx.Rdb.HIncrBy(context.Background(), fmt.Sprintf("article:%d", req.Id), "view", 1)
 		l.svcCtx.Rdb.ZIncrBy(context.Background(), "article:hotness:current_window", 1, fmt.Sprintf("%d", req.Id))
 		l.svcCtx.Rdb.ZIncrBy(context.Background(), "article:hotness:leaderboard", 1, strconv.FormatInt(req.Id, 10))
+		//l.svcCtx.Rdb.HExpire(context.Background(), fmt.Sprintf("article:%d", req.Id), 60*60)
 	} else {
 		var art model.Article
 		if err2 := l.svcCtx.DB.Model(&model.Article{}).Where("id = ?", req.Id).Preload("Author").First(&art).Error; err2 != nil || art.AuthorID == 0 {
@@ -53,6 +55,7 @@ func (l *ArticleDetailLogic) ArticleDetail(req *types.ArticleRequest) (resp *typ
 		}
 		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", art.Author.ID), "username", art.Author.Username, "priority", art.Author.Priority, "password", art.Author.Password)
 		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", req.Id), "AuId", art.AuthorID, "content", art.Content, "title", art.Title, "creat_at", art.CreatedAt.Format("2006-01-02 15:04:05"), "view", art.View+1, "like", art.Like)
+		//l.svcCtx.Rdb.HExpire(context.Background(), fmt.Sprintf("article:%d", req.Id), 60*60)
 		resp.Content = art.Content
 		resp.Title = art.Title
 		resp.CreatedAt = art.CreatedAt.Format("2006-01-02 15:04:05")

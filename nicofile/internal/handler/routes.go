@@ -75,6 +75,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/article/rank",
 				Handler: article.ArticleRankHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/article/search",
+				Handler: article.ArticleSearchHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/api/v1"),
 	)

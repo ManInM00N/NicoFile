@@ -58,11 +58,18 @@ type ArticleResponse struct {
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	CreatedAt  string `json:"createdat"`
+	Cover      string `json:"cover"`
 	View       string `json:"view"`
 	Like       string `json:"like"`
 	ArticleId  string `json:"articleid"`
 	AuthorId   string `json:"authorid"`
 	AuthorName string `json:"authorname"`
+}
+
+type ArticleSearchRequest struct {
+	Keyword string `json:"keyword"`
+	Page    int    `json:"page,range=[1:]"`
+	Size    int64  `json:"size,optional"`
 }
 
 type ArticleUpdateRequest struct {

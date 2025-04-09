@@ -55,6 +55,7 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	if !c.Redis.Disabled {
+		CacheRedis.PullData(ctx.Rdb, ctx.DB)
 		go func(rdb *redis.Client, DB *gorm.DB) {
 			timer := time.NewTimer(time.Duration(c.Redis.RefreshInterval) * time.Second)
 			for range timer.C {

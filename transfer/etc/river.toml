@@ -1,0 +1,238 @@
+
+server_id = 1
+flavor = "mysql"
+# MySQL 配置
+my_addr = "nico-mysql:3306"
+my_user = "root"
+my_pass = "root"
+my_charset = "utf8mb4"
+
+bulk_size = 128  # 每批同步文档数
+flush_bulk_time = "1000ms"
+bulk_actions = 1000    # 每批文档数
+es_addr = "elasticsearch:9200"
+es_user = ""
+es_pass = ""
+stat_path = "/metrics"
+
+
+# Elasticsearch 配置
+
+
+# 数据源配置
+[[source]]
+schema = "nicofile"  # 替换为您的实际数据库名
+tables = ["articles", "comments", "files", "users"]
+
+# 文章同步规则
+[[rule]]
+schema = "nicofile"
+table = "articles"
+index = "articles"
+type = "_doc"
+
+# 基础字段
+[[rule.field]]
+mysql = "id"
+elastic = "id"
+
+[[rule.field]]
+mysql = "title"
+elastic = "title"
+
+[[rule.field]]
+mysql = "content"
+elastic = "content"
+
+[[rule.field]]
+mysql = "author_id"
+elastic = "author_id"
+
+[[rule.field]]
+mysql = "view"
+elastic = "view"
+
+[[rule.field]]
+mysql = "like"
+elastic = "like"
+
+[[rule.field]]
+mysql = "cover"
+elastic = "cover"
+
+[[rule.field]]
+mysql = "created_at"
+elastic = "created_at"
+type = "string"  # 存储为字符串
+[[rule.field]]
+mysql = "updated_at"
+elastic = "updated_at"
+type = "string"  # 存储为字符串
+# 关联作者信息（需要确保用户表已同步）
+[[rule.field]]
+mysql = "author_id"
+elastic = "author.id"
+type = "string"
+[[rule.field]]
+column = "SELECT username FROM users WHERE id = ?"
+elastic = "author.username"
+args = ["author_id"]
+
+[[rule.field]]
+column = "SELECT cover FROM users WHERE id = ?"
+elastic = "author.cover"
+args = ["author_id"]
+
+# 评论同步规则
+[[rule]]
+schema = "nicofile"
+table = "comments"
+index = "comments"
+type = "_doc"
+
+# 基础字段
+[[rule.field]]
+mysql = "id"
+elastic = "id"
+
+[[rule.field]]
+mysql = "article_id"
+elastic = "article_id"
+
+[[rule.field]]
+mysql = "author_id"
+elastic = "author_id"
+
+[[rule.field]]
+mysql = "content"
+elastic = "content"
+
+[[rule.field]]
+mysql = "ip"
+elastic = "ip"
+
+[[rule.field]]
+mysql = "status"
+elastic = "status"
+
+[[rule.field]]
+mysql = "parent_id"
+elastic = "parent_id"
+
+[[rule.field]]
+mysql = "created_at"
+elastic = "created_at"
+type = "string"
+
+[[rule.field]]
+mysql = "updated_at"
+elastic = "updated_at"
+type = "string"
+
+# 关联作者信息
+[[rule.field]]
+column = "SELECT username FROM users WHERE id = ?"
+elastic = "author.username"
+args = ["author_id"]
+
+# 关联文章标题（便于搜索）
+[[rule.field]]
+column = "SELECT title FROM articles WHERE id = ?"
+elastic = "article_title"
+args = ["article_id"]
+
+# 文件同步规则
+[[rule]]
+schema = "nicofile"
+table = "files"
+index = "files"
+type = "_doc"
+
+[[rule.field]]
+mysql = "id"
+elastic = "id"
+
+[[rule.field]]
+mysql = "file_name"
+elastic = "file_name"
+
+[[rule.field]]
+mysql = "file_path"
+elastic = "file_path"
+
+[[rule.field]]
+mysql = "is_chunk"
+elastic = "is_chunk"
+
+[[rule.field]]
+mysql = "md5"
+elastic = "md5"
+
+[[rule.field]]
+mysql = "size"
+elastic = "size"
+
+[[rule.field]]
+mysql = "ext"
+elastic = "ext"
+
+[[rule.field]]
+mysql = "description"
+elastic = "description"
+
+[[rule.field]]
+mysql = "download_times"
+elastic = "download_times"
+
+[[rule.field]]
+mysql = "author_id"
+elastic = "author_id"
+
+[[rule.field]]
+mysql = "created_at"
+elastic = "created_at"
+type = "string"
+
+[[rule.field]]
+mysql = "updated_at"
+elastic = "updated_at"
+type = "string"
+
+# 关联作者信息
+[[rule.field]]
+column = "SELECT username FROM users WHERE id = ?"
+elastic = "author.username"
+args = ["author_id"]
+
+# 用户同步规则
+[[rule]]
+schema = "nicofile"
+table = "users"
+index = "users"
+type = "_doc"
+
+[[rule.field]]
+mysql = "id"
+elastic = "id"
+
+[[rule.field]]
+mysql = "username"
+elastic = "username"
+
+[[rule.field]]
+mysql = "priority"
+elastic = "priority"
+
+[[rule.field]]
+mysql = "cover"
+elastic = "cover"
+
+[[rule.field]]
+mysql = "created_at"
+elastic = "created_at"
+type = "string"
+
+[[rule.field]]
+mysql = "updated_at"
+elastic = "updated_at"
+type = "string"

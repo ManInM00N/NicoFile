@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 	"main/model"
@@ -52,6 +53,7 @@ func (l *UserRegisterLogic) UserRegister(req *types.RegisterRequest) (resp *type
 		Topic: "data-monitor-test", // l.svcCtx.Config.Kafka.Topic,
 		Value: sarama.ByteEncoder(data),
 	}
+	l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", User.ID), "username", User.Username, "priority", User.Priority, "password", User.Password)
 	token, _ := jwt.BuildTokens(jwt.TokenOptions{AccessSecret: l.svcCtx.Config.Auth.AccessSecret, AccessExpire: l.svcCtx.Config.Auth.AccessExpire, Fields: map[string]interface{}{"UserId": User.ID}})
 	resp.Message = "注册成功"
 	resp.Token = token.AccessToken

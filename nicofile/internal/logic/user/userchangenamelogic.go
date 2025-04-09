@@ -43,6 +43,7 @@ func (l *UserChangeNameLogic) UserChangeName(req *types.NewNameRequest) (resp *t
 		return
 	} else {
 		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", id), "username", req.NewName).Err()
+		//l.svcCtx.Rdb.Expire(context.Background(), fmt.Sprintf("user:%d", id), 60*60).Err()
 	}
 	return
 }

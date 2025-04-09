@@ -100,11 +100,11 @@ func f_() {
 }
 
 func main() {
-	f_()
-	return
+	//f_()
+	//return
 	util.NewLog("monitor-log")
 	util.Log.Println("monitor started")
-	DB := config2.InitDB()
+	DB := config2.InitDB("127.0.0.1")
 	DB.Model(&model.User{}).Count(&Users)
 	DB.Model(&model.File{}).Count(&Files)
 	config := sarama.NewConfig()

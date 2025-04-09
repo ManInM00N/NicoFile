@@ -31,14 +31,14 @@ func (l *ArticleDeleteLogic) ArticleDelete(req *types.ArticleDeleteRequest) (res
 		Error: false,
 	}
 	res, _ := l.svcCtx.Rdb.HGet(context.Background(), fmt.Sprintf("article:%d", req.Id), "AuId").Result()
-	id := l.ctx.Value("userId").(json.Number).String()
+	id := l.ctx.Value("UserId").(json.Number).String()
 	if res != id {
 		resp.Error = true
 		resp.Message = "无权删除"
 		return
 	}
 
-	if err2 := l.svcCtx.DB.Model(&model.Article{}).Where("id = ?", req.Id).Delete(&model.Article{}).Error; err2 != nil {
+	if err2 := l.svcCtx.DB.Unscoped().Model(&model.Article{}).Where("id = ?", req.Id).Delete(&model.Article{}).Error; err2 != nil {
 		resp.Error = true
 		resp.Message = "删除失败"
 		return

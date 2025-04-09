@@ -38,6 +38,7 @@ func (l *UserLoginTokenLogic) UserLoginToken(req *types.LoginTokenRequest) (resp
 		resp.Message = "身份认证失败"
 		return
 	}
+
 	resp.Username = User.Username
 	return
 }

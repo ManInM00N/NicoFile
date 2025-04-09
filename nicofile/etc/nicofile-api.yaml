@@ -5,7 +5,7 @@ MaxBytes: 5345280
 MaxConns: 100
 
 Sql:
-  host: "127.0.0.1"
+  host: "localhost" #127.0.0.1
 
 GrpcPool:
   Size: 100               # 连接池大小
@@ -50,6 +50,11 @@ Prometheus:
     Host: 0.0.0.0
     Port: 29091
     Path: /metrics
+
+Elasticsearch:
+    Host: "http://127.0.0.1"
+    Port: 29200
+
 
 Services:
     ArticleRank:

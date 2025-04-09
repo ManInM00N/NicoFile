@@ -10,6 +10,7 @@ import (
 	"main/pkg/util"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var (
@@ -91,7 +92,12 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		}
 		var list []model.Article
 		ids := make([]int, 0)
+		counts += len(keys)
 		for _, key := range keys {
+			if !statics.AllNum(key[8:]) {
+				counts--
+				continue
+			}
 			id := 0
 			fmt.Sscanf(key, "article:%d", &id)
 			ids = append(ids, id)
@@ -108,7 +114,6 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 			i.Title = data["title"]
 		}
 		DB.Model(&model.Article{}).Save(&list)
-		counts += len(keys)
 		keyp.Put(keys)
 		if cursor == 0 {
 			break
@@ -149,4 +154,55 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		}
 	}
 	util.Log.Println("Sync Users from Redis to SQLite finished, total:", counts)
+}
+func PullData(rdb *redis.Client, DB *gorm.DB) {
+	ctx := context.Background()
+	start := time.Now()
+	util.Log.Println("Starting sync from SQLite to Redis...")
+	var cursor uint64 = 0
+	counts := 0
+	for {
+		var list []model.File
+		DB.Model(&model.File{}).Offset(int(cursor)).Limit(200).Find(&list)
+		for _, key := range list {
+			rdb.HSet(ctx, fmt.Sprintf("file:%d", key.ID), "description", key.Description, "download_times", key.DownloadTimes, "file_path", key.FilePath, "author_id", key.AuthorID)
+		}
+		cursor += 200
+		counts += len(list)
+		if len(list) == 0 {
+			break
+		}
+	}
+	util.Log.Println("total files:", counts)
+	cursor = 0
+	counts = 0
+	for {
+		var list []model.Article
+		DB.Model(&model.Article{}).Offset(int(cursor)).Limit(200).Find(&list)
+		for _, key := range list {
+			rdb.HSet(ctx, fmt.Sprintf("article:%d", key.ID), "view", key.View, "like", key.Like, "content", key.Content, "title", key.Title, "AuId", key.AuthorID)
+		}
+		cursor += 200
+		counts += len(list)
+		if len(list) == 0 {
+			break
+		}
+	}
+	util.Log.Println("total articles:", counts)
+	cursor = 0
+	counts = 0
+	for {
+		var list []model.User
+		DB.Model(&model.User{}).Offset(int(cursor)).Limit(200).Find(&list)
+		for _, key := range list {
+			rdb.HSet(ctx, fmt.Sprintf("user:%d", key.ID), "username", key.Username, "password", key.Password, "priority", key.Priority)
+		}
+		cursor += 200
+		counts += len(list)
+		if len(list) == 0 {
+			break
+		}
+	}
+	util.Log.Println("total users:", counts)
+	util.Log.Println("Sync Users from Sql to Redis finished ", time.Now().Sub(start).Seconds(), "seconds")
 }

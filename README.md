@@ -19,7 +19,9 @@
 - [x] 文章基础功能 :monocle_face:
   - [x] 热点文章排行榜 :monocle_face:
   - [x] 图库 
-- [ ] 引入ES
+- [x] 引入ES
+  - [x] 文章搜索功能 :monocle_face:
+  - [x] 数据自动迁移功能 :monocle_face:
 - [ ] Redis 集群化
 - [x] kafka集成prometheus监控 :alien:
 - [x] 引入etcd管理微服务 :zap:

@@ -34,7 +34,7 @@ func InitDB(host string) *gorm.DB {
 		Logger:      logger.Discard,
 	})
 	if err != nil {
-		util.Log.Fatalln("failed to connect to database:", err)
+		util.Log.Fatalln("failed to connect to database:", err, dsn)
 	}
 	//DB, err = gorm.Open(sqlite.Open("./data.db"), &gorm.Config{
 	//	PrepareStmt: true,
@@ -47,16 +47,22 @@ func InitDB(host string) *gorm.DB {
 	sqlDB.SetMaxIdleConns(10)           // 最大空闲连接数
 	sqlDB.SetConnMaxLifetime(time.Hour) // 连接最大存活时间
 
-	err = DB.AutoMigrate(
-		&model.User{},
-		&model.File{},
-		&model.Chunk{},
-		&model.Article{},
-		&model.Image{},
-		&model.Comment{},
-	) // 自动迁移 User 模型
+	DB.AutoMigrate(&model.User{})
+	DB.AutoMigrate(&model.File{})
+	DB.AutoMigrate(&model.Chunk{})
+	DB.AutoMigrate(&model.Article{})
+	DB.AutoMigrate(&model.Image{})
+	DB.AutoMigrate(&model.Comment{})
+	//err = DB.AutoMigrate(
+	//	&model.User{},
+	//	&model.File{},
+	//	&model.Chunk{},
+	//	&model.Article{},
+	//	&model.Image{},
+	//	&model.Comment{},
+	//) // 自动迁移 User 模型
 	if err != nil {
-		util.Log.Fatalln("Table User failed Migrate")
+		util.Log.Fatalln("Table  failed Migrate", err)
 	}
 	pwd := encrypt.EncPassword("123456")
 	DB.Model(&model.User{}).Where("username = ?", "admin").FirstOrCreate(&model.User{Username: "admin", Password: pwd, Priority: 2})
