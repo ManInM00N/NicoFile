@@ -116,7 +116,16 @@ services:
   mysql2:
     image: mysql:8.0.22
     container_name: nico-mysql2
-    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW --binlog-row-image=FULL --bind-address=0.0.0.0 --skip-name-resolve
+    command:
+      --server-id=1 
+      --log-bin=mysql-bin 
+      --binlog-format=ROW 
+      --binlog-row-image=FULL 
+      --bind-address=0.0.0.0 
+      --skip-name-resolve
+      --character-set-server=utf8
+      --collation-server=utf8_general_ci
+      --init-connect='SET NAMES utf8'
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_ROOT_HOST: '%'
