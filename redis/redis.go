@@ -180,7 +180,7 @@ func PullData(rdb *redis.Client, DB *gorm.DB) {
 		var list []model.Article
 		DB.Model(&model.Article{}).Offset(int(cursor)).Limit(200).Find(&list)
 		for _, key := range list {
-			rdb.HSet(ctx, fmt.Sprintf("article:%d", key.ID), "view", key.View, "like", key.Like, "content", key.Content, "title", key.Title, "AuId", key.AuthorID)
+			rdb.HSet(ctx, fmt.Sprintf("article:%d", key.ID), "view", key.View, "like", key.Like, "content", key.Content, "title", key.Title, "AuId", key.AuthorID, "cover", key.Cover)
 		}
 		cursor += 200
 		counts += len(list)

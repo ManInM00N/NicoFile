@@ -37,6 +37,7 @@ func (l *ArticleDetailLogic) ArticleDetail(req *types.ArticleRequest) (resp *typ
 		resp.Title = res["title"]
 		resp.CreatedAt = res["creat_at"]
 		resp.View = res["view"]
+		resp.Cover = res["cover"]
 		resp.AuthorId = res["AuId"]
 		resp.Like = res["like"]
 		res, _ = l.svcCtx.Rdb.HGetAll(context.Background(), fmt.Sprintf("user:%s", resp.AuthorId)).Result()
@@ -54,10 +55,11 @@ func (l *ArticleDetailLogic) ArticleDetail(req *types.ArticleRequest) (resp *typ
 			return
 		}
 		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("user:%d", art.Author.ID), "username", art.Author.Username, "priority", art.Author.Priority, "password", art.Author.Password)
-		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", req.Id), "AuId", art.AuthorID, "content", art.Content, "title", art.Title, "creat_at", art.CreatedAt.Format("2006-01-02 15:04:05"), "view", art.View+1, "like", art.Like)
+		l.svcCtx.Rdb.HSet(context.Background(), fmt.Sprintf("article:%d", req.Id), "AuId", art.AuthorID, "content", art.Content, "title", art.Title, "creat_at", art.CreatedAt.Format("2006-01-02 15:04:05"), "view", art.View+1, "like", art.Like, "cover", art.Cover)
 		//l.svcCtx.Rdb.HExpire(context.Background(), fmt.Sprintf("article:%d", req.Id), 60*60)
 		resp.Content = art.Content
 		resp.Title = art.Title
+		resp.Cover = art.Cover
 		resp.CreatedAt = art.CreatedAt.Format("2006-01-02 15:04:05")
 		resp.View = strconv.FormatInt(art.View+1, 10)
 		resp.Like = strconv.FormatInt(art.Like, 10)
