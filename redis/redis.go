@@ -64,7 +64,7 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		}
 		DB.Model(&model.File{}).Where("id in ?", ids).Find(&list)
 		for _, i := range list {
-			data, err := rdb.HGetAll(ctx, strconv.Itoa(int(i.ID))).Result()
+			data, err := rdb.HGetAll(ctx, "file:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
@@ -104,7 +104,7 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		}
 		DB.Model(&model.Article{}).Where("id in ?", ids).Find(&list)
 		for _, i := range list {
-			data, err := rdb.HGetAll(ctx, strconv.Itoa(int(i.ID))).Result()
+			data, err := rdb.HGetAll(ctx, "article:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
@@ -139,7 +139,7 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 		}
 		DB.Model(&model.User{}).Where("id in ?", ids).Find(&list)
 		for _, i := range list {
-			data, err := rdb.HGetAll(ctx, strconv.Itoa(int(i.ID))).Result()
+			data, err := rdb.HGetAll(ctx, "user:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
