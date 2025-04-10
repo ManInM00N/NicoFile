@@ -49,9 +49,10 @@ func (l *ArticleSearchLogic) ArticleSearch(req *types.ArticleSearchRequest) (res
 	searchQuery := map[string]interface{}{
 		"query": map[string]interface{}{
 			"multi_match": map[string]interface{}{
-				"query":    req.Keyword,
-				"fields":   []string{"title", "content"},
-				"operator": "or", // title 或 content 匹配即可
+				"query":     req.Keyword,
+				"fields":    []string{"title", "content"},
+				"fuzziness": "AUTO",
+				"operator":  "or", // title 或 content 匹配即可
 			},
 		},
 		"sort": []map[string]interface{}{

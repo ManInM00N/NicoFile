@@ -189,6 +189,7 @@ func (s *ArticleRankServiceServer) GetArticleRank(ctx context.Context, req *arti
 	// 3. 按照热度排序
 	idToArticle := make(map[string]*model.Article)
 	for _, article := range articles {
+
 		idToArticle[fmt.Sprintf("%d", article.ID)] = article
 	}
 
