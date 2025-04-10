@@ -145,7 +145,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
-		rest.WithTimeout(15000*time.Millisecond),
+		rest.WithTimeout(60000*time.Millisecond),
 	)
 
 	server.AddRoutes(

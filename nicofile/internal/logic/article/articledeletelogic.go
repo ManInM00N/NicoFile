@@ -32,7 +32,7 @@ func (l *ArticleDeleteLogic) ArticleDelete(req *types.ArticleDeleteRequest) (res
 	}
 	res, _ := l.svcCtx.Rdb.HGet(context.Background(), fmt.Sprintf("article:%d", req.Id), "AuId").Result()
 	id := l.ctx.Value("UserId").(json.Number).String()
-	if res != id {
+	if res != id && id != "1" {
 		resp.Error = true
 		resp.Message = "无权删除"
 		return

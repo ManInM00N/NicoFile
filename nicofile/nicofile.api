@@ -190,7 +190,7 @@ type (
 	prefix:     /api/v1
 	jwt:        Auth
 	middleware: UserExistMiddleware
-	timeout:    15s
+	timeout:    60s
 	group:      file
 )
 service nicofile-api {
