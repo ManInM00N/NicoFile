@@ -53,7 +53,7 @@ func (l *FileDeleteLogic) FileDelete(req *types.FileDeleteRequest) (resp *types.
 			return
 		}
 	}
-	if (file.AuthorID != uint(id) && id <= 0) || file.ID == 0 {
+	if (file.AuthorID != uint(id) && id > 0) || file.ID == 0 {
 		resp.Message = "无权删除"
 		resp.Error = true
 		return
