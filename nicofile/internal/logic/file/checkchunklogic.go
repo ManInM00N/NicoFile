@@ -65,11 +65,13 @@ func (l *CheckChunkLogic) CheckChunk(req *types.CheckChunkRequest) (resp *types.
 		if chunk.ChunkIndex >= req.ChunkNum {
 			break
 		}
-
 		if chunk.MD5 != req.MD5[i] || chunk.ChunkIndex != i {
 			resp.Accept = i
 			break
 		}
+	}
+	if resp.Accept == req.ChunkNum && len(chunks) < req.ChunkNum {
+		resp.Accept = len(chunks)
 	}
 	for _, chunk := range chunks {
 		if chunk.ChunkIndex >= req.ChunkNum {
