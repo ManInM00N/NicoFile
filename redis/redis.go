@@ -63,13 +63,13 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 			ids = append(ids, id)
 		}
 		DB.Model(&model.File{}).Where("id in ?", ids).Find(&list)
-		for _, i := range list {
+		for idx, i := range list {
 			data, err := rdb.HGetAll(ctx, "file:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
-			i.Description = data["description"]
-			i.DownloadTimes = statics.StringToInt64(data["download_times"])
+			list[idx].Description = data["description"]
+			list[idx].DownloadTimes = statics.StringToInt64(data["download_times"])
 		}
 		DB.Model(&model.File{}).Save(&list)
 		//rdb.Del(ctx, keys...)
@@ -103,15 +103,15 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 			ids = append(ids, id)
 		}
 		DB.Model(&model.Article{}).Where("id in ?", ids).Find(&list)
-		for _, i := range list {
+		for idx, i := range list {
 			data, err := rdb.HGetAll(ctx, "article:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
-			i.View = statics.StringToInt64(data["view"])
-			i.Like = statics.StringToInt64(data["like"])
-			i.Content = data["content"]
-			i.Title = data["title"]
+			list[idx].View = statics.StringToInt64(data["view"])
+			list[idx].Like = statics.StringToInt64(data["like"])
+			list[idx].Content = data["content"]
+			list[idx].Title = data["title"]
 		}
 		DB.Model(&model.Article{}).Save(&list)
 		keyp.Put(keys)
@@ -138,13 +138,13 @@ func Transport(rdb *redis.Client, DB *gorm.DB) {
 			ids = append(ids, id)
 		}
 		DB.Model(&model.User{}).Where("id in ?", ids).Find(&list)
-		for _, i := range list {
+		for idx, i := range list {
 			data, err := rdb.HGetAll(ctx, "user:"+strconv.Itoa(int(i.ID))).Result()
 			if err != nil {
 				util.Log.Errorf("Failed to get hash data for key %d: %v", i.ID, err)
 			}
-			i.Username = data["username"]
-			i.Password = data["password"]
+			list[idx].Username = data["username"]
+			list[idx].Password = data["password"]
 		}
 		DB.Model(&model.User{}).Save(&list)
 		counts += len(keys)
