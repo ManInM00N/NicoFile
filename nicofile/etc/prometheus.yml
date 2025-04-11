@@ -5,7 +5,7 @@ global:
 scrape_configs:
   - job_name: 'go-zero-service'
     static_configs:
-      - targets: ['localhost:29091']  # Go-Zero 服务的 Prometheus 指标地址
+      - targets: ['host.docker.internal:29091']  # Go-Zero 服务的 Prometheus 指标地址
 #        labels: [
 #            instance: 'go-zero-service'
 #        ]

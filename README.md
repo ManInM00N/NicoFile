@@ -22,8 +22,10 @@
 - [x] 引入ES
   - [x] 文章搜索功能 :monocle_face:
   - [x] 数据自动迁移功能 :monocle_face:
+- [ ] 用户群组优化
 - [ ] Redis 集群化
 - [x] kafka集成prometheus监控 :alien:
+  - [x] grafana分析流量 :alien:
 - [x] 引入etcd管理微服务 :zap:
   - [x] 迁移用户微服务
   - [x] 迁移排行榜 

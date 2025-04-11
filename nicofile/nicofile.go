@@ -71,9 +71,9 @@ func main() {
 			}
 		}()
 	}
-	if c.DevServer.EnableMetrics {
-		server.Use(middleware.PrometheusMiddleware)
-	}
+	//if c.DevServer.EnableMetrics {
+	server.Use(middleware.PrometheusMiddleware)
+	//}
 	handler.RegisterHandlers(server, ctx)
 
 	util.Log.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
